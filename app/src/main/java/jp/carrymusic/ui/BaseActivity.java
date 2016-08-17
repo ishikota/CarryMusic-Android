@@ -46,9 +46,14 @@ public class BaseActivity extends AppCompatActivity implements MediaBrowserProvi
         return mMediaBrowser;
     }
 
+    protected void onMediaControllerConnected() {
+        // empty implementation, can be overridden by clients.
+    }
+
     private void connectToSession(MediaSessionCompat.Token token) throws RemoteException {
         MediaControllerCompat mediaController = new MediaControllerCompat(this, token);
         setSupportMediaController(mediaController);
+        onMediaControllerConnected();
     }
 
     private MediaBrowserCompat.ConnectionCallback mConnectionCallback = new MediaBrowserCompat.ConnectionCallback() {

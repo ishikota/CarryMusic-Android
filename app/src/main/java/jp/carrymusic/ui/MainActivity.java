@@ -23,4 +23,14 @@ public class MainActivity extends BaseActivity {
         }
     }
 
+    @Override
+    protected void onMediaControllerConnected() {
+        getBrowseFragment().onConnected();
+    }
+
+    private MusicListFragment getBrowseFragment() {
+        return (MusicListFragment) getSupportFragmentManager()
+                .findFragmentByTag(MusicListFragment.class.getSimpleName());
+    }
+
 }
