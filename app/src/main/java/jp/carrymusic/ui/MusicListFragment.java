@@ -2,8 +2,10 @@ package jp.carrymusic.ui;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -47,6 +49,16 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                 showProgress(true);
                 String videoId = binding.searchField.getText().toString();
                 loadNewMusic(videoId);
+            }
+        });
+        binding.musicController.btnPlayStop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MusicProviderSource model = Realm.getDefaultInstance()
+                        .where(MusicProviderSource.class).isNotNull("videoPath").findFirst();
+                Uri uri = Uri.fromFile(new File(model.getVideoPath()));
+                MediaControllerCompat.TransportControls controller = getActivity().getSupportMediaController().getTransportControls();
+                controller.playFromUri(uri, null);
             }
         });
         return binding.getRoot();
@@ -138,6 +150,8 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
     public void onMusicSelected(MusicProviderSource model) {
         if (model.getVideoPath() == null) {
             downloadVideoToDevice(model.getVideoId());
+        } else {
+            binding.musicController.musicTitle.setText(model.getTitle());
         }
     }
 }
