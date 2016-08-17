@@ -17,6 +17,7 @@ import io.realm.Realm;
 import jp.carrymusic.R;
 import jp.carrymusic.api.CarryMusicApiClient;
 import jp.carrymusic.databinding.FragmentMusicListBinding;
+import jp.carrymusic.model.MusicProvider;
 import jp.carrymusic.model.MusicProviderSource;
 import jp.carrymusic.utils.DividerItemDecoration;
 import jp.carrymusic.utils.FileSaveHelper;
@@ -25,7 +26,15 @@ import rx.Subscriber;
 
 public class MusicListFragment extends Fragment implements MusicListAdapter.MusicListClickListener {
 
+    private MusicProvider mMusicProvider;
+
     FragmentMusicListBinding binding;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mMusicProvider = new MusicProvider();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,8 +56,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
         recyclerView.addItemDecoration(new DividerItemDecoration(context));
-        MusicListAdapter adapter = new MusicListAdapter(context,
-                Realm.getDefaultInstance().where(MusicProviderSource.class).findAll(), this);
+        MusicListAdapter adapter = new MusicListAdapter(context, mMusicProvider.getAllMusic(), this);
         recyclerView.setAdapter(adapter);
     }
 
