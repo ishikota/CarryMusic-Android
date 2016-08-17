@@ -9,8 +9,6 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v7.app.AppCompatActivity;
 
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
 import jp.carrymusic.MediaBrowserProvider;
 import jp.carrymusic.MusicService;
 import jp.carrymusic.utils.PermissionHelper;
@@ -26,7 +24,6 @@ public class BaseActivity extends AppCompatActivity implements MediaBrowserProvi
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setupRealm();
         PermissionHelper.resolvePermission(BaseActivity.this);
         mMediaBrowser = new MediaBrowserCompat(this,
                 new ComponentName(this, MusicService.class), mConnectionCallback, null);
@@ -47,13 +44,6 @@ public class BaseActivity extends AppCompatActivity implements MediaBrowserProvi
     @Override
     public MediaBrowserCompat getMediaBrowser() {
         return mMediaBrowser;
-    }
-
-    private void setupRealm() {
-        RealmConfiguration realmConfig = new RealmConfiguration.Builder(getApplicationContext())
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        Realm.setDefaultConfiguration(realmConfig);
     }
 
     private void connectToSession(MediaSessionCompat.Token token) throws RemoteException {
