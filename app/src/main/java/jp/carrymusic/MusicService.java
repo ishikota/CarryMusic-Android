@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.media.MediaBrowserCompat;
@@ -45,6 +46,7 @@ public class MusicService extends MediaBrowserServiceCompat
     private final DelayedStopHandler mDelayedStopHandler = new DelayedStopHandler(this);
     // Delay stopSelf by using a handler.
     private static final int STOP_DELAY = 30000;
+    MediaNotificationManager mMediaNotificationManager;
 
     @Override
     public void onCreate() {
@@ -87,6 +89,12 @@ public class MusicService extends MediaBrowserServiceCompat
         mSession.setFlags(MediaSessionCompat.FLAG_HANDLES_MEDIA_BUTTONS |
                 MediaSessionCompat.FLAG_HANDLES_TRANSPORT_CONTROLS);
         mPlaybackManager.updatePlaybackState(null);
+
+        try {
+            mMediaNotificationManager = new MediaNotificationManager(this);
+        } catch (RemoteException e) {
+            throw new IllegalStateException("Could not create a MediaNotificationManager", e);
+        }
     }
 
     @Override
@@ -111,6 +119,7 @@ public class MusicService extends MediaBrowserServiceCompat
         Log.d(TAG, "onDestroy");
         // Service is being killed, so make sure we release our resources
         mPlaybackManager.handleStopRequest(null);
+        mMediaNotificationManager.stopNotification();
         mSession.release();
     }
 
@@ -155,7 +164,9 @@ public class MusicService extends MediaBrowserServiceCompat
     }
 
     @Override
-    public void onNotificationRequired() {}
+    public void onNotificationRequired() {
+        mMediaNotificationManager.startNotification();
+    }
 
     @Override
     public void onPlaybackStateUpdated(PlaybackStateCompat newState) {
