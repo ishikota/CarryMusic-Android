@@ -1,7 +1,6 @@
 package jp.carrymusic.ui;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
@@ -12,6 +11,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import jp.carrymusic.R;
+import jp.carrymusic.utils.DownloadHelper;
 
 public class MainActivity extends BaseActivity {
 
@@ -64,9 +64,15 @@ public class MainActivity extends BaseActivity {
             public boolean onQueryTextSubmit(String query) {
                 Log.d(TAG, "onQueryTextSubmit with query : " + query);
                 showProgressAction(searchItem, progressItem);
-                downloadItem(query, new Runnable() {
+                DownloadHelper.fetchNewItem(query, new DownloadHelper.DownloadCallback() {
                     @Override
-                    public void run() {
+                    public void onSuccess() {
+                        hideProgressAction(searchItem, progressItem);
+                    }
+
+                    @Override
+                    public void onError(String message) {
+                        // TODO notify error in some way
                         hideProgressAction(searchItem, progressItem);
                     }
                 });
@@ -81,10 +87,6 @@ public class MainActivity extends BaseActivity {
         });
 
         return super.onCreateOptionsMenu(menu);
-    }
-
-    private void downloadItem(String videoId, Runnable dummyCallback) {
-        new Handler().postDelayed(dummyCallback, 5000);
     }
 
     private void showProgressAction(MenuItem search, MenuItem progress) {
