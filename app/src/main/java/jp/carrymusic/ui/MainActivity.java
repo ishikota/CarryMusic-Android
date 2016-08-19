@@ -17,6 +17,11 @@ public class MainActivity extends BaseActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    // Hold query while network access to restore when network access failed
+    private String mQueryMemo = "";
+
+    private SearchView mSearchView;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,22 +63,26 @@ public class MainActivity extends BaseActivity {
 
         // Setup search item
         final MenuItem searchItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        mSearchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d(TAG, "onQueryTextSubmit with query : " + query);
+                saveQuery(query);
                 showProgressAction(searchItem, progressItem);
                 DownloadHelper.fetchNewItem(query, new DownloadHelper.DownloadCallback() {
                     @Override
                     public void onSuccess() {
                         hideProgressAction(searchItem, progressItem);
+                        clearQuery();
                     }
 
                     @Override
                     public void onError(String message) {
                         // TODO notify error in some way
                         hideProgressAction(searchItem, progressItem);
+                        searchItem.expandActionView();
+                        restoreSearchQuery();
                     }
                 });
                 return false;
@@ -83,6 +92,22 @@ public class MainActivity extends BaseActivity {
             public boolean onQueryTextChange(String newText) {
                 Log.d(TAG, "onQueryTextChange with newText : " + newText);
                 return false;
+            }
+        });
+
+        // Assign the listener to that action item
+        MenuItemCompat.setOnActionExpandListener(searchItem, new MenuItemCompat.OnActionExpandListener() {
+            @Override
+            public boolean onMenuItemActionExpand(MenuItem item) {
+                restoreSearchQuery();
+                return true;
+            }
+
+            @Override
+            public boolean onMenuItemActionCollapse(MenuItem item) {
+                String query = ((SearchView) item.getActionView()).getQuery().toString();
+                saveQuery(query);
+                return true;
             }
         });
 
@@ -98,6 +123,28 @@ public class MainActivity extends BaseActivity {
     private void hideProgressAction(MenuItem search, MenuItem progress) {
         search.setVisible(true);
         progress.setVisible(false);
+    }
+
+    private void saveQuery(String query) {
+        if (!query.isEmpty()) {
+            mQueryMemo = query;
+        }
+    }
+
+    private void clearQuery() {
+        mQueryMemo = "";
+    }
+
+    private void restoreSearchQuery() {
+        mSearchView.post(new Runnable() {
+            @Override
+            public void run() {
+                if (!mQueryMemo.isEmpty()) {  // Dirty solution to handle empty string overwrite
+                    mSearchView.setQuery(mQueryMemo, false);
+                    mQueryMemo = "";
+                }
+            }
+        });
     }
 
 
