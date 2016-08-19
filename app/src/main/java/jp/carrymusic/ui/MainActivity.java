@@ -1,6 +1,7 @@
 package jp.carrymusic.ui;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
@@ -46,31 +47,29 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
+    public boolean onCreateOptionsMenu(final Menu menu) {
+        Log.d(TAG, "onCreateOptionsMenu");
+
         getMenuInflater().inflate(R.menu.main_activity_actions, menu);
 
-        // Define the listener
-        MenuItemCompat.OnActionExpandListener expandListener = new MenuItemCompat.OnActionExpandListener() {
-            @Override
-            public boolean onMenuItemActionCollapse(MenuItem item) {
-                Log.d(TAG, "onMenuItemActionCollapse with item: " + item);
-                return true;  // Return true to collapse action view
-            }
+        // Setup progress item
+        final MenuItem progressItem = menu.findItem(R.id.action_progress);
+        MenuItemCompat.setActionView(progressItem, R.layout.menu_progress);
 
-            @Override
-            public boolean onMenuItemActionExpand(MenuItem item) {
-                Log.d(TAG, "onMenuItemActionExpand with item: " + item);
-                // Do something when expanded
-                return true;  // Return true to expand action view
-            }
-        };
-
-        MenuItem searchItem = menu.findItem(R.id.action_search);
+        // Setup search item
+        final MenuItem searchItem = menu.findItem(R.id.action_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 Log.d(TAG, "onQueryTextSubmit with query : " + query);
+                showProgressAction(searchItem, progressItem);
+                downloadItem(query, new Runnable() {
+                    @Override
+                    public void run() {
+                        hideProgressAction(searchItem, progressItem);
+                    }
+                });
                 return false;
             }
 
@@ -81,10 +80,22 @@ public class MainActivity extends BaseActivity {
             }
         });
 
-        // Assign the listener to that action item
-        MenuItemCompat.setOnActionExpandListener(searchItem, expandListener);
-
         return super.onCreateOptionsMenu(menu);
+    }
+
+    private void downloadItem(String videoId, Runnable dummyCallback) {
+        new Handler().postDelayed(dummyCallback, 5000);
+    }
+
+    private void showProgressAction(MenuItem search, MenuItem progress) {
+        search.collapseActionView();
+        search.setVisible(false);
+        progress.setVisible(true);
+    }
+
+    private void hideProgressAction(MenuItem search, MenuItem progress) {
+        search.setVisible(true);
+        progress.setVisible(false);
     }
 
 
