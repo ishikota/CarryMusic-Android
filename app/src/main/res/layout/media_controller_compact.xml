@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/controller_container"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/media_controller_peek_height"
+        android:orientation="horizontal"
+        android:background="@android:color/white"
+        android:padding="8dp">
+
+        <TextView android:id="@+id/music_title"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:singleLine="true"
+            android:focusable="true"
+            android:focusableInTouchMode="true"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="marquee_forever"/>
+
+        <ImageButton android:id="@+id/btn_play_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_media_play"
+            android:enabled="true"/>
+
+    </LinearLayout>
+</layout>

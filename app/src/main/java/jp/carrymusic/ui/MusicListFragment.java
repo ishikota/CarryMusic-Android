@@ -16,18 +16,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import java.io.File;
-
-import io.realm.Realm;
 import jp.carrymusic.R;
-import jp.carrymusic.api.CarryMusicApiClient;
 import jp.carrymusic.databinding.FragmentMusicListBinding;
 import jp.carrymusic.model.MusicProvider;
 import jp.carrymusic.model.MusicProviderSource;
 import jp.carrymusic.utils.DividerItemDecoration;
-import jp.carrymusic.utils.FileSaveHelper;
-import retrofit.client.Response;
-import rx.Subscriber;
+import jp.carrymusic.utils.DownloadHelper;
 
 public class MusicListFragment extends Fragment implements MusicListAdapter.MusicListClickListener {
 
@@ -48,19 +42,6 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
         setupRecyclerView(binding.recyclerView, getContext());
-        binding.btn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showProgress(true);
-                String videoId = binding.searchField.getText().toString();
-                loadNewMusic(videoId);
-            }
-        });
-        binding.musicController.btnPlayStop.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-            }
-        });
         return binding.getRoot();
     }
 
@@ -92,80 +73,6 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         recyclerView.setAdapter(adapter);
     }
 
-    private void loadNewMusic(String videoId) {
-        CarryMusicApiClient.getInstance().createVideo(videoId)
-                .subscribe(new Subscriber<MusicProviderSource>() {
-                    @Override
-                    public void onCompleted() {
-                        showProgress(false);
-                        binding.searchField.setText("");
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        Log.e("hoge", e.getMessage());
-                        showProgress(false);
-                    }
-
-                    @Override
-                    public void onNext(final MusicProviderSource model) {
-                        Log.i("hoge", model.toString());
-                        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-                            @Override
-                            public void execute(Realm realm) {
-                                realm.copyToRealm(model);
-                            }
-                        });
-                    }
-                });
-    }
-
-    private void downloadVideoToDevice(final String videoId) {
-        CarryMusicApiClient.getInstance().downloadVideo(videoId).subscribe(new Subscriber<Response>() {
-            @Override
-            public void onCompleted() {
-                Log.d("MusicListFragment", "downloadVideoToDevice:Completed");
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                e.printStackTrace();
-            }
-
-            @Override
-            public void onNext(Response response) {
-                FileSaveHelper.saveMusic(getContext(), videoId, response,
-                        new FileSaveHelper.SaveMusicCallback() {
-                            @Override
-                            public void onSuccess(final File destFile) {
-                                Log.d("MusicListFragment", "downloadVideoToDevice:Save success");
-                                Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-                                    @Override
-                                    public void execute(Realm realm) {
-                                        MusicProviderSource model =
-                                                realm.where(MusicProviderSource.class)
-                                                        .equalTo("videoId", videoId).findFirst();
-                                        model.setVideoPath(destFile.getAbsolutePath());
-                                    }
-                                });
-                            }
-
-                            @Override
-                            public void onError(String message) {
-                                Log.e("MusicListFragment", "downloadVideoToDevice:" + message);
-                            }
-                        });
-            }
-        });
-    }
-
-    private void showProgress(boolean show) {
-        Log.i("hoge", "progress:" + show);
-        binding.btn.setVisibility(show ? View.GONE : View.VISIBLE);
-        binding.progress.setVisibility(show ? View.VISIBLE : View.GONE);
-    }
-
-
     @Override
     public void onMusicSelected(MusicProviderSource model) {
         if (model.getVideoPath() == null) {
@@ -183,6 +90,20 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                 getActivity().getSupportMediaController().getTransportControls().playFromMediaId(model.getVideoId(), null);
             }
         }
+    }
+
+    private void downloadVideoToDevice(final String videoId) {
+        DownloadHelper.downloadItemIntoDevice(getContext(), videoId, new DownloadHelper.DownloadCallback() {
+            @Override
+            public void onSuccess() {
+                // TODO should notify success in some way
+            }
+
+            @Override
+            public void onError(String message) {
+                // TODO should notify error in some way
+            }
+        });
     }
 
     // Receive callbacks from the MediaController. Here we update our state such as which queue
@@ -254,10 +175,22 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         }
         if (enablePlay) {
             // set play icon
-            Toast.makeText(getContext(), "playable", Toast.LENGTH_SHORT).show();
+            binding.musicController.btnPlayStop.setImageResource(android.R.drawable.ic_media_play);
+            binding.musicController.btnPlayStop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getActivity().getSupportMediaController().getTransportControls().play();
+                }
+            });
         } else {
             // set pause icon
-            Toast.makeText(getContext(), "pauseable", Toast.LENGTH_SHORT).show();
+            binding.musicController.btnPlayStop.setImageResource(android.R.drawable.ic_media_pause);
+            binding.musicController.btnPlayStop.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getActivity().getSupportMediaController().getTransportControls().pause();
+                }
+            });
         }
     }
 
