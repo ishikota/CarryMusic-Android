@@ -6,10 +6,16 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <TextView android:id="@+id/seekbar_caption"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:gravity="center"/>
+
         <SeekBar android:id="@+id/seekbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"/>
+            android:layout_below="@+id/seekbar_caption"/>
 
         <LinearLayout android:id="@+id/play_controller"
             android:layout_width="match_parent"

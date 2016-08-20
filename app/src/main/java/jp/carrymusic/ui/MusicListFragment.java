@@ -84,10 +84,14 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
     private void setupSeekBar(SeekBar seekBar) {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                binding.mediaControllerFull.seekbarCaption
+                        .setText(genSeekBarCaption(seekBar, progress));
+            }
 
             @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {}
+            public void onStartTrackingTouch(SeekBar seekBar) {
+            }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
@@ -194,6 +198,8 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
             if (event.equals(MusicService.SESSION_EVENT_NOTIFY_CURRENT_POSITION)) {
                 int currentDuration = extras.getInt(MusicService.EXTRA_DURATION);
                 binding.mediaControllerFull.seekbar.setProgress(currentDuration);
+                binding.mediaControllerFull.seekbarCaption
+                        .setText(genSeekBarCaption(binding.mediaControllerFull.seekbar, currentDuration));
                 Log.d(TAG, "Received current position : " + currentDuration);
             }
         }
@@ -224,6 +230,8 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         int musicLengthInSecond =
                 (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) * 1000;
         binding.mediaControllerFull.seekbar.setMax(musicLengthInSecond);
+        binding.mediaControllerFull.seekbarCaption
+                .setText(genSeekBarCaption(binding.mediaControllerFull.seekbar, musicLengthInSecond));
         binding.mediaControllerCompact.musicTitle.setText(metadata.getDescription().getTitle());
     }
 
@@ -281,6 +289,21 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                 }
             });
         }
+    }
+
+    private String genSeekBarCaption(SeekBar seekBar, int current) {
+        current /= 1000;
+        int max = seekBar.getMax() / 1000;
+        return String.format("%d:%02d / %d:%02d",
+                fetchMin(current), fetchSec(current), fetchMin(max), fetchSec(max));
+    }
+
+    private int fetchMin(int position) {
+        return position / 60;
+    }
+
+    private int fetchSec(int position) {
+        return position % 60;
     }
 
 }
