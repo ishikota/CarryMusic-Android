@@ -1,50 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/controller_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView android:id="@+id/music_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:singleLine="true"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:ellipsize="marquee"
-            android:marqueeRepeatLimit="marquee_forever"/>
-
         <SeekBar android:id="@+id/seekbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"/>
 
         <LinearLayout android:id="@+id/play_controller"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_below="@+id/seekbar">
 
             <ImageButton android:id="@+id/btn_prev"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_media_previous"
-                android:enabled="false"/>
+                android:contentDescription="Previous"/>
 
             <ImageButton android:id="@+id/btn_play_stop"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_media_play"
-                android:enabled="true"/>
+                android:contentDescription="Play or Stop"/>
 
             <ImageButton android:id="@+id/btn_next"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@android:drawable/ic_media_next"
-                android:enabled="false"/>
+                android:contentDescription="Next"/>
 
         </LinearLayout>
 
-    </LinearLayout>
+    </RelativeLayout>
 </layout>

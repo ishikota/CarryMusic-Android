@@ -16,17 +16,15 @@
         <LinearLayout android:id="@+id/bottom_sheet"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             app:layout_behavior="@string/bottom_sheet_behavior"
             app:behavior_peekHeight="@dimen/media_controller_peek_height">
 
-            <include android:id="@+id/music_controller"
+            <include android:id="@+id/media_controller_compact"
                 layout="@layout/media_controller_compact" />
 
-            <FrameLayout android:id="@+id/bottom_sheet_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/white"/>
+            <include android:id="@+id/media_controller_full"
+                layout="@layout/media_controller_full" />
 
         </LinearLayout>
 

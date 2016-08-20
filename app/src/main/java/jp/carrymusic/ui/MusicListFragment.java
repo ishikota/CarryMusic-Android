@@ -4,6 +4,7 @@ import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.app.Fragment;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -18,6 +19,8 @@ import android.widget.Toast;
 
 import jp.carrymusic.R;
 import jp.carrymusic.databinding.FragmentMusicListBinding;
+import jp.carrymusic.databinding.MediaControllerCompactBinding;
+import jp.carrymusic.databinding.MediaControllerFullBinding;
 import jp.carrymusic.model.MusicProvider;
 import jp.carrymusic.model.MusicProviderSource;
 import jp.carrymusic.utils.DividerItemDecoration;
@@ -42,6 +45,8 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
         setupRecyclerView(binding.recyclerView, getContext());
+        setupMediaController(binding.mediaControllerCompact, binding.mediaControllerFull);
+        setupBottomSheet(BottomSheetBehavior.from(binding.bottomSheet));
         return binding.getRoot();
     }
 
@@ -71,6 +76,45 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         recyclerView.addItemDecoration(new DividerItemDecoration(context));
         MusicListAdapter adapter = new MusicListAdapter(context, mMusicProvider.getAllMusic(), this);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void setupMediaController(
+            MediaControllerCompactBinding compact, MediaControllerFullBinding full) {
+        full.btnNext.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportMediaController().getTransportControls().skipToNext();
+            }
+        });
+        full.btnPrev.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().getSupportMediaController().getTransportControls().skipToPrevious();
+            }
+        });
+    }
+
+    private void setupBottomSheet(BottomSheetBehavior behavior) {
+        behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
+            @Override
+            public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                Log.d(TAG, "BottomSheetBehavior.onStateChanged = " + newState);
+                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
+                    binding.mediaControllerCompact.btnMediaControl.setEnabled(false);
+                    binding.mediaControllerCompact.btnMediaControl.setVisibility(View.GONE);
+                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
+                    binding.mediaControllerCompact.btnMediaControl.setEnabled(true);
+                    binding.mediaControllerCompact.btnMediaControl.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onSlide(@NonNull View bottomSheet, float slideOffset) {
+                Log.d(TAG, "BottomSheetBehavior.onSlide = " + slideOffset);
+                binding.mediaControllerFull.getRoot().setAlpha(slideOffset);
+                binding.mediaControllerCompact.btnMediaControl.setAlpha(1-slideOffset);
+            }
+        });
     }
 
     @Override
@@ -149,7 +193,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
             return;
         }
 
-        binding.musicController.musicTitle.setText(metadata.getDescription().getTitle());
+        binding.mediaControllerCompact.musicTitle.setText(metadata.getDescription().getTitle());
     }
 
     private void onPlaybackStateChanged(PlaybackStateCompat state) {
@@ -175,8 +219,15 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         }
         if (enablePlay) {
             // set play icon
-            binding.musicController.btnPlayStop.setImageResource(android.R.drawable.ic_media_play);
-            binding.musicController.btnPlayStop.setOnClickListener(new View.OnClickListener() {
+            binding.mediaControllerCompact.btnMediaControl.setImageResource(android.R.drawable.ic_media_play);
+            binding.mediaControllerCompact.btnMediaControl.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getActivity().getSupportMediaController().getTransportControls().play();
+                }
+            });
+            binding.mediaControllerFull.btnPlayStop.setImageResource(android.R.drawable.ic_media_play);
+            binding.mediaControllerFull.btnPlayStop.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     getActivity().getSupportMediaController().getTransportControls().play();
@@ -184,8 +235,15 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
             });
         } else {
             // set pause icon
-            binding.musicController.btnPlayStop.setImageResource(android.R.drawable.ic_media_pause);
-            binding.musicController.btnPlayStop.setOnClickListener(new View.OnClickListener() {
+            binding.mediaControllerCompact.btnMediaControl.setImageResource(android.R.drawable.ic_media_pause);
+            binding.mediaControllerCompact.btnMediaControl.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    getActivity().getSupportMediaController().getTransportControls().pause();
+                }
+            });
+            binding.mediaControllerFull.btnPlayStop.setImageResource(android.R.drawable.ic_media_pause);
+            binding.mediaControllerFull.btnPlayStop.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     getActivity().getSupportMediaController().getTransportControls().pause();
