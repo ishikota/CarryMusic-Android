@@ -19,26 +19,29 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SeekBar;
 import android.widget.Toast;
 
 import jp.carrymusic.MusicService;
 import jp.carrymusic.R;
 import jp.carrymusic.databinding.FragmentMusicListBinding;
-import jp.carrymusic.databinding.MediaControllerCompactBinding;
-import jp.carrymusic.databinding.MediaControllerFullBinding;
 import jp.carrymusic.model.MusicProvider;
 import jp.carrymusic.model.MusicProviderSource;
 import jp.carrymusic.utils.DividerItemDecoration;
 import jp.carrymusic.utils.DownloadHelper;
 
-public class MusicListFragment extends Fragment implements MusicListAdapter.MusicListClickListener {
+public class MusicListFragment extends Fragment implements MusicListAdapter.MusicListClickListener,
+        Contract.CompactControllerViewContract, Contract.FullControllerViewContract {
+
 
     private static final String TAG = MusicListFragment.class.getSimpleName();
 
     private MusicProvider mMusicProvider;
 
     private SearchMenuPresenter mSearchMenuPresenter;
+
+    private CompactMediaControllerPresenter mCompactControllerPresenter;
+
+    private FullMediaControllerPresenter mFullControllerPresenter;
 
     FragmentMusicListBinding binding;
 
@@ -48,17 +51,22 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         setHasOptionsMenu(true);
         mMusicProvider = new MusicProvider();
         mSearchMenuPresenter = new SearchMenuPresenter();
+        mCompactControllerPresenter = new CompactMediaControllerPresenter(this);
+        mFullControllerPresenter = new FullMediaControllerPresenter(this);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
+
         setupToolbar(binding.toolbar);
         setupRecyclerView(binding.recyclerView, getContext());
-        setupSeekBar(binding.mediaControllerFull.seekbar);
-        setupMediaController(binding.mediaControllerCompact, binding.mediaControllerFull);
         setupBottomSheet(BottomSheetBehavior.from(binding.bottomSheet));
+
+        mCompactControllerPresenter.setup(binding.mediaControllerCompact);
+        mFullControllerPresenter.setup(binding.mediaControllerFull);
+
         return binding.getRoot();
     }
 
@@ -82,6 +90,13 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         }
     }
 
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.d(TAG, "onCreateOptionsMenu");
+        inflater.inflate(R.menu.main_activity_actions, menu);
+        mSearchMenuPresenter.setup(menu);
+    }
+
     private void setupToolbar(Toolbar toolbar) {
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
     }
@@ -94,113 +109,24 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         recyclerView.setAdapter(adapter);
     }
 
-    private void setupSeekBar(SeekBar seekBar) {
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                binding.mediaControllerFull.seekbarCaption
-                        .setText(genSeekBarCaption(seekBar, progress));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                getActivity().getSupportMediaController().getTransportControls().seekTo(seekBar.getProgress());
-            }
-        });
-    }
-
-    private void setupMediaController(
-            MediaControllerCompactBinding compact, MediaControllerFullBinding full) {
-        full.btnNext.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().getSupportMediaController().getTransportControls().skipToNext();
-            }
-        });
-        full.btnPrev.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                getActivity().getSupportMediaController().getTransportControls().skipToPrevious();
-            }
-        });
-    }
-
     private void setupBottomSheet(final BottomSheetBehavior behavior) {
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
                 Log.d(TAG, "BottomSheetBehavior.onStateChanged = " + newState);
-                if (newState == BottomSheetBehavior.STATE_EXPANDED) {
-                    binding.mediaControllerCompact.btnMediaControl.setEnabled(false);
-                    binding.mediaControllerCompact.btnMediaControl.setVisibility(View.GONE);
-                } else if (newState == BottomSheetBehavior.STATE_COLLAPSED) {
-                    binding.mediaControllerCompact.btnMediaControl.setEnabled(true);
-                    binding.mediaControllerCompact.btnMediaControl.setVisibility(View.VISIBLE);
-                }
+                mCompactControllerPresenter.onBottomSheetStateChanged(newState);
+                mFullControllerPresenter.onBottomSheetStateChanged(newState);
             }
 
             @Override
             public void onSlide(@NonNull View bottomSheet, float slideOffset) {
                 Log.d(TAG, "BottomSheetBehavior.onSlide = " + slideOffset);
-                binding.mediaControllerFull.getRoot().setAlpha(slideOffset);
-                binding.mediaControllerCompact.btnMediaControl.setAlpha(1-slideOffset);
-            }
-        });
-        binding.mediaControllerCompact.getRoot().setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
-                    behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
-                } else if (behavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
-                    behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
-                }
+                mCompactControllerPresenter.onBottomSheetSlide(slideOffset);
+                mFullControllerPresenter.onBottomSheetSlide(slideOffset);
             }
         });
     }
 
-    @Override
-    public void onMusicSelected(MusicProviderSource model) {
-        if (model.getVideoPath() == null) {
-            downloadVideoToDevice(model.getVideoId());
-        } else {
-            MediaControllerCompat controller = getActivity().getSupportMediaController();
-            int state = controller.getPlaybackState().getState();
-            String currentMusicId = controller.getMetadata() != null ?
-                    controller.getMetadata().getDescription().getMediaId() : "";
-
-            Log.d(MusicListFragment.class.getSimpleName(), "state = " + state);
-            if (state == PlaybackStateCompat.STATE_PLAYING && currentMusicId.equals(model.getVideoId())) {
-                getActivity().getSupportMediaController().getTransportControls().pause();
-            } else {
-                getActivity().getSupportMediaController().getTransportControls().playFromMediaId(model.getVideoId(), null);
-            }
-        }
-    }
-
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        Log.d(TAG, "onCreateOptionsMenu");
-        inflater.inflate(R.menu.main_activity_actions, menu);
-        mSearchMenuPresenter.setup(menu);
-    }
-
-    private void downloadVideoToDevice(final String videoId) {
-        DownloadHelper.downloadItemIntoDevice(getContext(), videoId, new DownloadHelper.DownloadCallback() {
-            @Override
-            public void onSuccess() {
-                // TODO should notify success in some way
-            }
-
-            @Override
-            public void onError(String message) {
-                // TODO should notify error in some way
-            }
-        });
-    }
 
     // Receive callbacks from the MediaController. Here we update our state such as which queue
     // is being shown, the current title and description and the PlaybackState.
@@ -227,10 +153,8 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
             Log.d(TAG, "Received session event : event = " + event);
             if (event.equals(MusicService.SESSION_EVENT_NOTIFY_CURRENT_POSITION)) {
                 int currentDuration = extras.getInt(MusicService.EXTRA_DURATION);
-                binding.mediaControllerFull.seekbar.setProgress(currentDuration);
-                binding.mediaControllerFull.seekbarCaption
-                        .setText(genSeekBarCaption(binding.mediaControllerFull.seekbar, currentDuration));
-                Log.d(TAG, "Received current position : " + currentDuration);
+                mCompactControllerPresenter.onPlayingPositionUpdated(currentDuration);
+                mFullControllerPresenter.onPlayingPositionUpdated(currentDuration);
             }
         }
     };
@@ -257,12 +181,8 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
             return;
         }
 
-        int musicLengthInSecond =
-                (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) * 1000;
-        binding.mediaControllerFull.seekbar.setMax(musicLengthInSecond);
-        binding.mediaControllerFull.seekbarCaption
-                .setText(genSeekBarCaption(binding.mediaControllerFull.seekbar, musicLengthInSecond));
-        binding.mediaControllerCompact.musicTitle.setText(metadata.getDescription().getTitle());
+        mCompactControllerPresenter.onMetadataChanged(metadata);
+        mFullControllerPresenter.onMetadataChanged(metadata);
     }
 
     private void onPlaybackStateChanged(PlaybackStateCompat state) {
@@ -286,54 +206,96 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                 Toast.makeText(getActivity(), state.getErrorMessage(), Toast.LENGTH_LONG).show();
                 break;
         }
-        if (enablePlay) {
-            // set play icon
-            binding.mediaControllerCompact.btnMediaControl.setImageResource(android.R.drawable.ic_media_play);
-            binding.mediaControllerCompact.btnMediaControl.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    getActivity().getSupportMediaController().getTransportControls().play();
-                }
-            });
-            binding.mediaControllerFull.btnPlayStop.setImageResource(android.R.drawable.ic_media_play);
-            binding.mediaControllerFull.btnPlayStop.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    getActivity().getSupportMediaController().getTransportControls().play();
-                }
-            });
+
+        mCompactControllerPresenter.onPlaybackStateChanged(enablePlay);
+        mFullControllerPresenter.onPlaybackStateChanged(enablePlay);
+    }
+
+    /*
+        Callback called from MusicListAdapter
+    */
+    @Override
+    public void onMusicSelected(MusicProviderSource model) {
+        if (model.getVideoPath() == null) {
+            downloadVideoToDevice(model.getVideoId());
         } else {
-            // set pause icon
-            binding.mediaControllerCompact.btnMediaControl.setImageResource(android.R.drawable.ic_media_pause);
-            binding.mediaControllerCompact.btnMediaControl.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    getActivity().getSupportMediaController().getTransportControls().pause();
-                }
-            });
-            binding.mediaControllerFull.btnPlayStop.setImageResource(android.R.drawable.ic_media_pause);
-            binding.mediaControllerFull.btnPlayStop.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    getActivity().getSupportMediaController().getTransportControls().pause();
-                }
-            });
+            MediaControllerCompat controller = getActivity().getSupportMediaController();
+            int state = controller.getPlaybackState().getState();
+            String currentMusicId = controller.getMetadata() != null ?
+                    controller.getMetadata().getDescription().getMediaId() : "";
+
+            Log.d(TAG, "state = " + state);
+            if (state == PlaybackStateCompat.STATE_PLAYING && currentMusicId.equals(model.getVideoId())) {
+                onPauseRequested();
+            } else {
+                playFromModel(model);
+            }
         }
     }
 
-    private String genSeekBarCaption(SeekBar seekBar, int current) {
-        current /= 1000;
-        int max = seekBar.getMax() / 1000;
-        return String.format("%d:%02d / %d:%02d",
-                fetchMin(current), fetchSec(current), fetchMin(max), fetchSec(max));
+    private void downloadVideoToDevice(final String videoId) {
+        DownloadHelper.downloadItemIntoDevice(getContext(), videoId, new DownloadHelper.DownloadCallback() {
+            @Override
+            public void onSuccess() {
+                // TODO should notify success in some way
+            }
+
+            @Override
+            public void onError(String message) {
+                // TODO should notify error in some way
+            }
+        });
     }
 
-    private int fetchMin(int position) {
-        return position / 60;
+    /*
+        Contract method for CompactMediaControllerPresenter
+     */
+
+    @Override
+    public void onMusicTitleClicked() {
+        BottomSheetBehavior behavior = BottomSheetBehavior.from(binding.bottomSheet);
+        if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+            behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+        } else if (behavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+        }
     }
 
-    private int fetchSec(int position) {
-        return position % 60;
+    private MediaControllerCompat.TransportControls getMediaTransportControl() {
+        return getActivity().getSupportMediaController().getTransportControls();
     }
 
+    private void playFromModel(MusicProviderSource model) {
+        getMediaTransportControl().playFromMediaId(model.getVideoId(), null);
+    }
+
+    @Override
+    public void onPlayRequested() {
+        getMediaTransportControl().play();
+    }
+
+    @Override
+    public void onPauseRequested() {
+        getMediaTransportControl().pause();
+    }
+
+
+    /*
+        Contract method for FullMediaControllerPresenter
+     */
+
+    @Override
+    public void onSeekBarReleased(int progress) {
+        getMediaTransportControl().seekTo(progress);
+    }
+
+    @Override
+    public void onSkipToNextRequested() {
+        getMediaTransportControl().skipToNext();
+    }
+
+    @Override
+    public void onSkipToPreviousRequested() {
+        getMediaTransportControl().skipToPrevious();
+    }
 }
