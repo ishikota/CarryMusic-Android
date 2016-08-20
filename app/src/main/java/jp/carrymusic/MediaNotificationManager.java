@@ -22,6 +22,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationManagerCompat;
@@ -32,6 +34,9 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
+
+import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Target;
 
 import jp.carrymusic.ui.MainActivity;
 
@@ -258,22 +263,6 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
         MediaDescriptionCompat description = mMetadata.getDescription();
 
-//        String fetchArtUrl = null;
-//        Bitmap art = null;
-//        if (description.getIconUri() != null) {
-//            // This sample assumes the iconUri will be a valid URL formatted String, but
-//            // it can actually be any valid Android Uri formatted String.
-//            // async fetch the album art icon
-//            String artUrl = description.getIconUri().toString();
-//            art = AlbumArtCache.getInstance().getBigImage(artUrl);
-//            if (art == null) {
-//                fetchArtUrl = artUrl;
-//                // use a placeholder art while the remote art is being downloaded
-//                art = BitmapFactory.decodeResource(mService.getResources(),
-//                    R.drawable.ic_default_art);
-//            }
-//        }
-
         notificationBuilder
                 .setStyle(new NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(
@@ -286,12 +275,9 @@ public class MediaNotificationManager extends BroadcastReceiver {
                 .setContentIntent(createContentIntent(description))
                 .setContentTitle(description.getTitle())
                 .setContentText(description.getSubtitle());
-                //.setLargeIcon(art);
 
         setNotificationPlaybackState(notificationBuilder);
-//        if (fetchArtUrl != null) {
-//            fetchBitmapFromURLAsync(fetchArtUrl, notificationBuilder);
-//        }
+        fetchBitmapFromURLAsync(mMetadata.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI), notificationBuilder);
 
         return notificationBuilder.build();
     }
@@ -340,19 +326,23 @@ public class MediaNotificationManager extends BroadcastReceiver {
         builder.setOngoing(mPlaybackState.getState() == PlaybackStateCompat.STATE_PLAYING);
     }
 
-//    private void fetchBitmapFromURLAsync(final String bitmapUrl,
-//                                         final NotificationCompat.Builder builder) {
-//        AlbumArtCache.getInstance().fetch(bitmapUrl, new AlbumArtCache.FetchListener() {
-//            @Override
-//            public void onFetched(String artUrl, Bitmap bitmap, Bitmap icon) {
-//                if (mMetadata != null && mMetadata.getDescription().getIconUri() != null &&
-//                            mMetadata.getDescription().getIconUri().toString().equals(artUrl)) {
-//                    // If the media is still the same, update the notification:
-//                    LogHelper.d(TAG, "fetchBitmapFromURLAsync: set bitmap to ", artUrl);
-//                    builder.setLargeIcon(bitmap);
-//                    mNotificationManager.notify(NOTIFICATION_ID, builder.build());
-//                }
-//            }
-//        });
-//    }
+    private void fetchBitmapFromURLAsync(final String bitmapUrl,
+                                         final NotificationCompat.Builder builder) {
+        Picasso.with(mService).load(bitmapUrl).into(new Target() {
+            @Override
+            public void onBitmapLoaded(Bitmap bitmap, Picasso.LoadedFrom from) {
+                builder.setLargeIcon(bitmap);
+                mNotificationManager.notify(NOTIFICATION_ID, builder.build());
+            }
+
+            @Override
+            public void onBitmapFailed(Drawable errorDrawable) {
+                Log.e(TAG, "fetchBitmapFromURLAsync:failed");
+                mNotificationManager.notify(NOTIFICATION_ID, builder.build());
+            }
+
+            @Override
+            public void onPrepareLoad(Drawable placeHolderDrawable) { /* do nothing */}
+        });
+    }
 }
