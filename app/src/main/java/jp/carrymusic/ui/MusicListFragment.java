@@ -9,10 +9,14 @@ import android.support.v4.app.Fragment;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
@@ -34,18 +38,23 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
 
     private MusicProvider mMusicProvider;
 
+    private SearchMenuPresenter mSearchMenuPresenter;
+
     FragmentMusicListBinding binding;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
         mMusicProvider = new MusicProvider();
+        mSearchMenuPresenter = new SearchMenuPresenter();
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
+        setupToolbar(binding.toolbar);
         setupRecyclerView(binding.recyclerView, getContext());
         setupSeekBar(binding.mediaControllerFull.seekbar);
         setupMediaController(binding.mediaControllerCompact, binding.mediaControllerFull);
@@ -71,6 +80,10 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         if (controller != null) {
             controller.unregisterCallback(mCallback);
         }
+    }
+
+    private void setupToolbar(Toolbar toolbar) {
+        ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
     }
 
     private void setupRecyclerView(RecyclerView recyclerView, Context context) {
@@ -166,6 +179,13 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                 getActivity().getSupportMediaController().getTransportControls().playFromMediaId(model.getVideoId(), null);
             }
         }
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        Log.d(TAG, "onCreateOptionsMenu");
+        inflater.inflate(R.menu.main_activity_actions, menu);
+        mSearchMenuPresenter.setup(menu);
     }
 
     private void downloadVideoToDevice(final String videoId) {
