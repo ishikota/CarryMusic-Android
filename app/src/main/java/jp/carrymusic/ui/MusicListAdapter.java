@@ -5,7 +5,10 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import io.realm.OrderedRealmCollection;
 import io.realm.RealmRecyclerViewAdapter;
@@ -40,10 +43,13 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
         viewHolder.durationView.setText(String.format("%d:%d", data.getDuration()/60, data.getDuration()%60));
         viewHolder.data = data;
         viewHolder.statusLabel.setText(data.getVideoPath()!=null ? "CACHED" : "DOWNLOAD");
+        Picasso.with(viewHolder.thumbnail.getContext())
+                .load(data.getThumbnailUrl()).into(viewHolder.thumbnail);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView textView, fileSizeView, durationView, statusLabel;
+        public ImageView thumbnail;
         public MusicProviderSource data;
         public ViewHolder(View itemView) {
             super(itemView);
@@ -51,6 +57,7 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
             fileSizeView = (TextView) itemView.findViewById(R.id.file_size);
             durationView = (TextView) itemView.findViewById(R.id.duration);
             statusLabel = (TextView) itemView.findViewById(R.id.status_label);
+            thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
             itemView.setOnClickListener(this);
         }
 

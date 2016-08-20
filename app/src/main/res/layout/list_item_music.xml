@@ -3,17 +3,26 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
+    <ImageView android:id="@+id/thumbnail"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:scaleType="centerCrop"
+        android:contentDescription="thumbnail"
+        android:layout_margin="8dp"/>
+
     <TextView android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="16sp"
-        android:layout_toLeftOf="@+id/status_label"/>
+        android:layout_toLeftOf="@+id/status_label"
+        android:layout_toRightOf="@+id/thumbnail"/>
     <TextView android:id="@+id/file_size"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:layout_below="@+id/text"
-        android:layout_marginRight="8dp"/>
+        android:layout_marginRight="8dp"
+        android:layout_toRightOf="@+id/thumbnail"/>
     <TextView android:id="@+id/duration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
