@@ -116,7 +116,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         });
     }
 
-    private void setupBottomSheet(BottomSheetBehavior behavior) {
+    private void setupBottomSheet(final BottomSheetBehavior behavior) {
         behavior.setBottomSheetCallback(new BottomSheetBehavior.BottomSheetCallback() {
             @Override
             public void onStateChanged(@NonNull View bottomSheet, int newState) {
@@ -135,6 +135,16 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                 Log.d(TAG, "BottomSheetBehavior.onSlide = " + slideOffset);
                 binding.mediaControllerFull.getRoot().setAlpha(slideOffset);
                 binding.mediaControllerCompact.btnMediaControl.setAlpha(1-slideOffset);
+            }
+        });
+        binding.mediaControllerCompact.getRoot().setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (behavior.getState() == BottomSheetBehavior.STATE_COLLAPSED) {
+                    behavior.setState(BottomSheetBehavior.STATE_EXPANDED);
+                } else if (behavior.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+                    behavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+                }
             }
         });
     }
