@@ -20,6 +20,7 @@ import java.util.List;
 import jp.carrymusic.model.MusicProvider;
 import jp.carrymusic.model.MusicProviderSource;
 import jp.carrymusic.playback.LocalPlayback;
+import jp.carrymusic.playback.Playback;
 import jp.carrymusic.playback.PlaybackManager;
 import jp.carrymusic.playback.QueueManager;
 
@@ -41,9 +42,30 @@ public class MusicService extends MediaBrowserServiceCompat
     // indicates that the music playback should be paused (see {@link #onStartCommand})
     public static final String CMD_PAUSE = "CMD_PAUSE";
 
+    // Values used for sync Playback current position with UI.
+    public static final String SESSION_EVENT_NOTIFY_CURRENT_POSITION = "jp.carrymusic.notify_current_position";
+    public static final String EXTRA_DURATION = "jp.carrymusic.extra_duration";
+
+    // While playback plays, this runnable post current playing position through Session object.
+    private Runnable mSeekBarSyncAction = new Runnable() {
+
+        @Override
+        public void run() {
+            Playback playback = mPlaybackManager.getPlayback();
+            if (playback.isPlaying()) {
+                Log.i(TAG, "mSeekBarSyncAction current position = " + playback.getCurrentStreamPosition());
+                Bundle bundle = new Bundle();
+                bundle.putInt(EXTRA_DURATION, playback.getCurrentStreamPosition());
+                mSession.sendSessionEvent(SESSION_EVENT_NOTIFY_CURRENT_POSITION, bundle);
+                mSeekBarSyncHandler.postDelayed(mSeekBarSyncAction, 1000);
+            }
+        }
+    };
+
     private MediaSessionCompat mSession;
     private PlaybackManager mPlaybackManager;
     private final DelayedStopHandler mDelayedStopHandler = new DelayedStopHandler(this);
+    private final Handler mSeekBarSyncHandler = new Handler();
     // Delay stopSelf by using a handler.
     private static final int STOP_DELAY = 30000;
     MediaNotificationManager mMediaNotificationManager;
@@ -143,6 +165,7 @@ public class MusicService extends MediaBrowserServiceCompat
             mSession.setActive(true);
         }
 
+        mSeekBarSyncHandler.post(mSeekBarSyncAction);
         mDelayedStopHandler.removeCallbacksAndMessages(null);
 
         // The service needs to continue running even after the bound client (usually a
@@ -158,6 +181,7 @@ public class MusicService extends MediaBrowserServiceCompat
     public void onPlaybackStop() {
         // Reset the delayed stop handler, so after STOP_DELAY it will be executed again,
         // potentially stopping the service.
+        mSeekBarSyncHandler.removeCallbacks(mSeekBarSyncAction);
         mDelayedStopHandler.removeCallbacksAndMessages(null);
         mDelayedStopHandler.sendEmptyMessageDelayed(0, STOP_DELAY);
         stopForeground(true);

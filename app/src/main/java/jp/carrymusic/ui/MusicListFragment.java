@@ -15,8 +15,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.SeekBar;
 import android.widget.Toast;
 
+import jp.carrymusic.MusicService;
 import jp.carrymusic.R;
 import jp.carrymusic.databinding.FragmentMusicListBinding;
 import jp.carrymusic.databinding.MediaControllerCompactBinding;
@@ -45,6 +47,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                              Bundle savedInstanceState) {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_music_list, container, false);
         setupRecyclerView(binding.recyclerView, getContext());
+        setupSeekBar(binding.mediaControllerFull.seekbar);
         setupMediaController(binding.mediaControllerCompact, binding.mediaControllerFull);
         setupBottomSheet(BottomSheetBehavior.from(binding.bottomSheet));
         return binding.getRoot();
@@ -76,6 +79,21 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         recyclerView.addItemDecoration(new DividerItemDecoration(context));
         MusicListAdapter adapter = new MusicListAdapter(context, mMusicProvider.getAllMusic(), this);
         recyclerView.setAdapter(adapter);
+    }
+
+    private void setupSeekBar(SeekBar seekBar) {
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {}
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                getActivity().getSupportMediaController().getTransportControls().seekTo(seekBar.getProgress());
+            }
+        });
     }
 
     private void setupMediaController(
@@ -169,6 +187,16 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                     " song=" + metadata.getDescription().getTitle());
             MusicListFragment.this.onMetadataChanged(metadata);
         }
+
+        @Override
+        public void onSessionEvent(String event, Bundle extras) {
+            Log.d(TAG, "Received session event : event = " + event);
+            if (event.equals(MusicService.SESSION_EVENT_NOTIFY_CURRENT_POSITION)) {
+                int currentDuration = extras.getInt(MusicService.EXTRA_DURATION);
+                binding.mediaControllerFull.seekbar.setProgress(currentDuration);
+                Log.d(TAG, "Received current position : " + currentDuration);
+            }
+        }
     };
 
 
@@ -193,6 +221,9 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
             return;
         }
 
+        int musicLengthInSecond =
+                (int) metadata.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) * 1000;
+        binding.mediaControllerFull.seekbar.setMax(musicLengthInSecond);
         binding.mediaControllerCompact.musicTitle.setText(metadata.getDescription().getTitle());
     }
 
