@@ -2,7 +2,11 @@
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <!-- Customize your theme here. -->
+
+        <!-- Color used for ProgressBar, SeekBar, etc -->
+        <item name="colorControlNormal">@color/app_control_color</item>
+        <item name="colorControlActivated">@color/app_control_color</item>
+
     </style>
 
     <style name="MediaControllerBtn" parent="@android:style/Widget.Button.Small">
