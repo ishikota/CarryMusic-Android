@@ -5,6 +5,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetBehavior;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
@@ -264,10 +265,24 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                         }
                     });
                 } else if (item.getItemId() == R.id.action_delete_cache) {
+                    final String videoPathMemo = model.getVideoPath();
                     Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
                             model.setVideoPath(null);
+                            Snackbar.make(binding.containerForSnackBar, "Deleted", Snackbar.LENGTH_LONG)
+                                    .setAction("UNDO", new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+                                                @Override
+                                                public void execute(Realm realm) {
+                                                    model.setVideoPath(videoPathMemo);
+                                                }
+                                            });
+                                        }
+                                    })
+                                    .show();
                         }
                     });
                 }
