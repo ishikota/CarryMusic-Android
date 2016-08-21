@@ -1,50 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/controller_container"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@android:color/white"
+        android:background="@color/media_control_bg"
         android:clickable="true">
 
-        <TextView android:id="@+id/seekbar_caption"
+        <LinearLayout android:id="@+id/seekbar_container"
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:gravity="center"/>
+            android:paddingRight="@dimen/media_control_container_padding"
+            android:paddingLeft="@dimen/media_control_container_padding">
 
-        <SeekBar android:id="@+id/seekbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/seekbar_caption"/>
+            <TextView android:id="@+id/seekbar_current_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/music_list_secondary_text_size"
+                android:textColor="@color/secondary_text"/>
+
+            <SeekBar android:id="@+id/seekbar"
+                android:layout_weight="1"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"/>
+
+            <TextView android:id="@+id/seekbar_max_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="@dimen/music_list_secondary_text_size"
+                android:textColor="@color/secondary_text"/>
+
+        </LinearLayout>
 
         <LinearLayout android:id="@+id/play_controller"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center"
-            android:layout_below="@+id/seekbar">
+            android:gravity="center">
 
             <ImageButton android:id="@+id/btn_prev"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_previous"
-                android:contentDescription="Previous"/>
+                style="@style/MediaControllerBtn"
+                android:src="@drawable/ic_skip_previous_black_48dp"
+                android:contentDescription="@string/previous"/>
 
             <ImageButton android:id="@+id/btn_play_stop"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_play"
-                android:contentDescription="Play or Stop"/>
+                style="@style/MediaControllerBtn"
+                android:src="@drawable/ic_play_arrow_black_48dp"
+                android:contentDescription="@string/play_or_pause"/>
 
             <ImageButton android:id="@+id/btn_next"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@android:drawable/ic_media_next"
-                android:contentDescription="Next"/>
+                style="@style/MediaControllerBtn"
+                android:src="@drawable/ic_skip_next_black_48dp"
+                android:contentDescription="@string/next"/>
 
         </LinearLayout>
 
-    </RelativeLayout>
+    </LinearLayout>
 </layout>

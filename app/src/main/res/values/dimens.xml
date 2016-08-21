@@ -17,4 +17,9 @@
     <dimen name="action_more_size">48dp</dimen>
     <dimen name="action_more_padding">8dp</dimen>
 
+    <!-- media controller -->
+    <dimen name="media_control_container_padding">8dp</dimen>
+    <dimen name="media_control_btn_size">56dp</dimen>
+    <dimen name="media_control_btn_padding">8dp</dimen>
+
 </resources>

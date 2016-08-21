@@ -2,29 +2,33 @@
 <layout>
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/controller_container"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="@dimen/media_controller_peek_height"
-        android:orientation="horizontal"
-        android:background="@android:color/white"
-        android:padding="8dp">
+        android:background="@color/media_control_bg"
+        android:padding="@dimen/media_control_container_padding">
 
         <TextView android:id="@+id/music_title"
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_marginRight="@dimen/music_list_row_info_item_space"
+            android:layout_marginEnd="@dimen/music_list_row_info_item_space"
             android:gravity="center"
             android:singleLine="true"
             android:focusable="true"
             android:focusableInTouchMode="true"
             android:ellipsize="marquee"
             android:marqueeRepeatLimit="marquee_forever"
-            android:text="No Music is Selected..."/>
+            android:text="@string/no_music_selected"
+            android:textColor="@color/secondary_text"
+            android:textSize="@dimen/music_list_text_size" />
 
         <ImageButton android:id="@+id/btn_media_control"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@android:drawable/ic_media_play"
-            android:contentDescription="Play or Pause" />
+            style="@style/MediaControllerBtn"
+            android:layout_gravity="center_vertical"
+            android:src="@drawable/ic_play_arrow_black_48dp"
+            android:contentDescription="@string/play_or_pause" />
 
     </LinearLayout>
 </layout>

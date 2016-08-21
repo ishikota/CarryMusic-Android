@@ -4,9 +4,12 @@ import android.support.design.widget.BottomSheetBehavior;
 import android.support.v4.media.MediaMetadataCompat;
 import android.view.View;
 
+import jp.carrymusic.R;
 import jp.carrymusic.databinding.MediaControllerCompactBinding;
 
 public class CompactMediaControllerPresenter implements Contract.MusicListPresenterContract {
+
+    private static final float MEDIA_BUTTON_ALPHA = 0.8f;
 
     private final Contract.CompactControllerViewContract mView;
 
@@ -43,7 +46,7 @@ public class CompactMediaControllerPresenter implements Contract.MusicListPresen
     // Update alpha to become invisible when bottom sheet is fully expanded.
     @Override
     public void onBottomSheetSlide(float slideOffset) {
-        mRoot.btnMediaControl.setAlpha(1 - slideOffset);
+        mRoot.btnMediaControl.setAlpha(MEDIA_BUTTON_ALPHA * (1 - slideOffset));
     }
 
     @Override
@@ -55,7 +58,7 @@ public class CompactMediaControllerPresenter implements Contract.MusicListPresen
     public void onPlaybackStateChanged(boolean enableToPlay) {
         if (enableToPlay) {
             // set play action on media button
-            mRoot.btnMediaControl.setImageResource(android.R.drawable.ic_media_play);
+            mRoot.btnMediaControl.setImageResource(R.drawable.ic_play_arrow_black_48dp);
             mRoot.btnMediaControl.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -64,7 +67,7 @@ public class CompactMediaControllerPresenter implements Contract.MusicListPresen
             });
         } else {
             // set pause action on media button
-            mRoot.btnMediaControl.setImageResource(android.R.drawable.ic_media_pause);
+            mRoot.btnMediaControl.setImageResource(R.drawable.ic_pause_black_48dp);
             mRoot.btnMediaControl.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {

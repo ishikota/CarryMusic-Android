@@ -5,4 +5,12 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="MediaControllerBtn" parent="@android:style/Widget.Button.Small">
+        <item name="android:layout_width">@dimen/media_controller_btn_size</item>
+        <item name="android:layout_height">@dimen/media_controller_btn_size</item>
+        <item name="android:padding">@dimen/media_control_btn_padding</item>
+        <item name="android:background">?android:attr/selectableItemBackground</item>
+        <item name="android:alpha">0.8</item>
+    </style>
+
 </resources>
