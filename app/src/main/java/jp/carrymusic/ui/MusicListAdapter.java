@@ -22,10 +22,16 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
 
     private final MusicListClickListener mClickCallback;
 
+    private final int PRIMARY_TEXT_COLOR;
+
+    private final int DISABLED_TEXT_COLOR;
+
     public MusicListAdapter(Context context, OrderedRealmCollection<MusicProviderSource> data,
                             MusicListClickListener callback) {
         super(context, data, true);
         mClickCallback = callback;
+        PRIMARY_TEXT_COLOR = context.getResources().getColor(R.color.primary_text);
+        DISABLED_TEXT_COLOR = context.getResources().getColor(R.color.disabled_text);
     }
 
     @Override
@@ -56,10 +62,14 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
         boolean is_music_cached = data.getVideoPath() != null;
         if (is_music_cached) {
             viewHolder.icon_cache_warning.setVisibility(View.GONE);
+            viewHolder.musicTitle.setTextColor(PRIMARY_TEXT_COLOR);
             viewHolder.fileSize.setText(String.format("%.1f MB", data.getDataSizeInMB()));
+            viewHolder.thumbnail.setAlpha(1.0f);
         } else {
             viewHolder.icon_cache_warning.setVisibility(View.VISIBLE);
-            viewHolder.fileSize.setVisibility(View.GONE);
+            viewHolder.musicTitle.setTextColor(DISABLED_TEXT_COLOR);
+            viewHolder.fileSize.setText("-- MB");
+            viewHolder.thumbnail.setAlpha(0.5f);
         }
     }
 

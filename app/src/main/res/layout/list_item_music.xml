@@ -67,7 +67,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginRight="@dimen/music_list_row_info_item_space"
                 android:layout_marginEnd="@dimen/music_list_row_info_item_space"
-                android:textSize="@dimen/music_list_secondary_text_size" />
+                android:textSize="@dimen/music_list_secondary_text_size"
+                android:textColor="@color/secondary_text"/>
 
             <ImageView android:id="@+id/icon_file_size"
                 android:layout_width="@dimen/sub_icon_size"
@@ -82,7 +83,8 @@
             <TextView android:id="@+id/file_size"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="@dimen/music_list_secondary_text_size"/>
+                android:textSize="@dimen/music_list_secondary_text_size"
+                android:textColor="@color/secondary_text"/>
 
 
         </LinearLayout>
