@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">CarryMusic</string>
+
+    <!-- Content Description -->
+    <string name="thumbnail">thumbnail</string>
+    <string name="file_size">file size</string>
+    <string name="duration">duration</string>
+    <string name="action_more">more</string>
+    <string name="cache_warning">no cache</string>
 </resources>

@@ -2,6 +2,7 @@ package jp.carrymusic.ui;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,8 @@ import jp.carrymusic.R;
 import jp.carrymusic.model.MusicProviderSource;
 
 public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSource, MusicListAdapter.ViewHolder> {
+
+    private static final String TAG = MusicListAdapter.class.getSimpleName();
 
     private final MusicListClickListener mClickCallback;
 
@@ -35,28 +38,41 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
 
     @Override
     public void onBindViewHolder(MusicListAdapter.ViewHolder viewHolder, int i) {
-        final MusicProviderSource data = getData().get(i);
-        viewHolder.textView.setText(data.getTitle());
-        if (data.getVideoPath()!=null) {
-            viewHolder.fileSizeView.setText(String.format("%.1f MB", data.getDataSizeInMB()));
+
+        // Suppress "may NullPointerException" warning
+        if (getData() == null) {
+            Log.e(TAG, String.format("onBindViewHolder: getData on position %d returns null", i));
+            return;
         }
-        viewHolder.durationView.setText(String.format("%d:%d", data.getDuration()/60, data.getDuration()%60));
+
+        final MusicProviderSource data = getData().get(i);
         viewHolder.data = data;
-        viewHolder.statusLabel.setText(data.getVideoPath()!=null ? "CACHED" : "DOWNLOAD");
+
+        viewHolder.musicTitle.setText(data.getTitle());
+        viewHolder.duration.setText(String.format("%d:%d", data.getDuration()/60, data.getDuration()%60));
         Picasso.with(viewHolder.thumbnail.getContext())
                 .load(data.getThumbnailUrl()).into(viewHolder.thumbnail);
+
+        boolean is_music_cached = data.getVideoPath() != null;
+        if (is_music_cached) {
+            viewHolder.icon_cache_warning.setVisibility(View.GONE);
+            viewHolder.fileSize.setText(String.format("%.1f MB", data.getDataSizeInMB()));
+        } else {
+            viewHolder.icon_cache_warning.setVisibility(View.VISIBLE);
+            viewHolder.fileSize.setVisibility(View.GONE);
+        }
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
-        public TextView textView, fileSizeView, durationView, statusLabel;
-        public ImageView thumbnail;
+        public TextView musicTitle, fileSize, duration;
+        public ImageView thumbnail, icon_cache_warning;
         public MusicProviderSource data;
         public ViewHolder(View itemView) {
             super(itemView);
-            textView = (TextView) itemView.findViewById(R.id.text);
-            fileSizeView = (TextView) itemView.findViewById(R.id.file_size);
-            durationView = (TextView) itemView.findViewById(R.id.duration);
-            statusLabel = (TextView) itemView.findViewById(R.id.status_label);
+            musicTitle = (TextView) itemView.findViewById(R.id.music_title);
+            fileSize = (TextView) itemView.findViewById(R.id.file_size);
+            duration = (TextView) itemView.findViewById(R.id.duration);
+            icon_cache_warning = (ImageView) itemView.findViewById(R.id.icon_cache_warning);
             thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
             itemView.setOnClickListener(this);
         }

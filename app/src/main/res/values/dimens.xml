@@ -2,4 +2,19 @@
 <resources>
     <dimen name="media_controller_peek_height">72dp</dimen>
     <dimen name="media_controller_btn_size">56dp</dimen>
+
+    <!-- music list item -->
+    <dimen name="music_list_text_size">16sp</dimen>
+    <dimen name="music_list_secondary_text_size">14sp</dimen>
+    <dimen name="music_list_row_height">88dp</dimen>
+    <dimen name="music_list_row_info_padding">4dp</dimen>
+    <dimen name="music_list_row_info_item_space">8dp</dimen>
+    <dimen name="music_list_row_info_icon_space">4dp</dimen>
+    <dimen name="thumbnail_size">72dp</dimen>
+    <dimen name="thumbnail_margin">8dp</dimen>
+    <dimen name="sub_icon_size">16dp</dimen>
+    <dimen name="sub_icon_tweak_margin_top">2dp</dimen>
+    <dimen name="action_more_size">48dp</dimen>
+    <dimen name="action_more_padding">8dp</dimen>
+
 </resources>
