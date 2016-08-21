@@ -1,6 +1,7 @@
 package jp.carrymusic.utils;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -8,18 +9,28 @@ import android.graphics.drawable.Drawable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-public class DividerItemDecoration extends RecyclerView.ItemDecoration {
+import jp.carrymusic.R;
+
+public class MusicListDivider extends RecyclerView.ItemDecoration {
 
     private static final int[] ATTRS = new int[]{
             android.R.attr.listDivider
     };
 
+    private final int LEFT_DIVIDER_START;
+
     private Drawable mDivider;
 
-    public DividerItemDecoration(Context context) {
+    public MusicListDivider(Context context) {
         final TypedArray a = context.obtainStyledAttributes(ATTRS);
         mDivider = a.getDrawable(0);
         a.recycle();
+        LEFT_DIVIDER_START = calculateDividerStart(context.getResources());
+    }
+
+    private int calculateDividerStart(Resources resources) {
+        return (int) (resources.getDimension(R.dimen.thumbnail_size) +
+                resources.getDimension(R.dimen.thumbnail_margin) * 2);
     }
 
     @Override
@@ -38,7 +49,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration {
                     .getLayoutParams();
             final int top = child.getBottom() + params.bottomMargin;
             final int bottom = top + mDivider.getIntrinsicHeight();
-            mDivider.setBounds(left, top, right, bottom);
+            mDivider.setBounds(left + LEFT_DIVIDER_START, top, right, bottom);
             mDivider.draw(c);
         }
     }

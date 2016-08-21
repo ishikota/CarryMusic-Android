@@ -26,8 +26,8 @@ import jp.carrymusic.R;
 import jp.carrymusic.databinding.FragmentMusicListBinding;
 import jp.carrymusic.model.MusicProvider;
 import jp.carrymusic.model.MusicProviderSource;
-import jp.carrymusic.utils.DividerItemDecoration;
 import jp.carrymusic.utils.DownloadHelper;
+import jp.carrymusic.utils.MusicListDivider;
 
 public class MusicListFragment extends Fragment implements MusicListAdapter.MusicListClickListener,
         Contract.CompactControllerViewContract, Contract.FullControllerViewContract {
@@ -104,7 +104,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
     private void setupRecyclerView(RecyclerView recyclerView, Context context) {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
-        recyclerView.addItemDecoration(new DividerItemDecoration(context));
+        recyclerView.addItemDecoration(new MusicListDivider(context));
         MusicListAdapter adapter = new MusicListAdapter(context, mMusicProvider.getAllMusic(), this);
         recyclerView.setAdapter(adapter);
     }
