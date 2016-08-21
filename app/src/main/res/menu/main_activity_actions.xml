@@ -2,12 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item android:id="@+id/action_search"
-        android:title="Search"
-        android:icon="@android:drawable/ic_menu_search"
+        android:title="@string/download"
+        android:icon="@drawable/ic_file_download_black_48dp"
         app:showAsAction="ifRoom|collapseActionView"
         app:actionViewClass="android.support.v7.widget.SearchView" />
     <item android:id="@+id/action_progress"
-        android:title="Progress"
+        android:title="@string/progress"
         android:visible="false"
         app:showAsAction="always"/>
 </menu>

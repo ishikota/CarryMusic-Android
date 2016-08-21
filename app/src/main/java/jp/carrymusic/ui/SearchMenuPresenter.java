@@ -36,6 +36,11 @@ public class SearchMenuPresenter {
 
     private void setupSearchAction(final MenuItem searchItem, final MenuItem progressItem) {
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+        String searchHint =
+                searchView.getContext().getResources().getString(R.string.search_query_hint);
+        searchView.setQueryHint(searchHint);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
