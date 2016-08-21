@@ -76,7 +76,7 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView musicTitle, fileSize, duration;
-        public ImageView thumbnail, icon_cache_warning;
+        public ImageView thumbnail, icon_cache_warning, icon_action_more;
         public MusicProviderSource data;
         public ViewHolder(View itemView) {
             super(itemView);
@@ -84,18 +84,25 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
             fileSize = (TextView) itemView.findViewById(R.id.file_size);
             duration = (TextView) itemView.findViewById(R.id.duration);
             icon_cache_warning = (ImageView) itemView.findViewById(R.id.icon_cache_warning);
+            icon_action_more = (ImageView) itemView.findViewById(R.id.action_more);
             thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
             itemView.setOnClickListener(this);
+            icon_action_more.setOnClickListener(this);
         }
 
         @Override
         public void onClick(View v) {
-            mClickCallback.onMusicSelected(data);
+            if (v.getId() == R.id.action_more) {
+                mClickCallback.onMoreActionClicked(data, v);
+            } else {
+                mClickCallback.onMusicSelected(data);
+            }
         }
     }
 
     public interface MusicListClickListener {
         void onMusicSelected(MusicProviderSource model);
+        void onMoreActionClicked(MusicProviderSource model, View v);
     }
 
 }

@@ -11,16 +11,19 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import io.realm.Realm;
 import jp.carrymusic.MusicService;
 import jp.carrymusic.R;
 import jp.carrymusic.databinding.FragmentMusicListBinding;
@@ -245,6 +248,34 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                 // TODO should notify error in some way
             }
         });
+    }
+
+    @Override
+    public void onMoreActionClicked(final MusicProviderSource model, View v) {
+        PopupMenu popup = new PopupMenu(getContext(), v);
+        popup.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                if (item.getItemId() == R.id.action_delete_data) {
+                    Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            model.deleteFromRealm();
+                        }
+                    });
+                } else if (item.getItemId() == R.id.action_delete_cache) {
+                    Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+                        @Override
+                        public void execute(Realm realm) {
+                            model.setVideoPath(null);
+                        }
+                    });
+                }
+                return false;
+            }
+        });
+        popup.inflate(R.menu.music_list_action_more);
+        popup.show();
     }
 
     /*

@@ -6,6 +6,8 @@
     <!-- Menu -->
     <string name="download">Download</string>
     <string name="progress">Progress</string>
+    <string name="delete_data">Delete this item</string>
+    <string name="delete_cache">Delete audio cache from device</string>
     <string name="search_query_hint">Enter video id to download…</string>
 
     <!-- Content Description -->
