@@ -15,6 +15,7 @@ import io.realm.OrderedRealmCollection;
 import io.realm.RealmRecyclerViewAdapter;
 import jp.carrymusic.R;
 import jp.carrymusic.model.MusicProviderSource;
+import jp.carrymusic.utils.UIHelper;
 
 public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSource, MusicListAdapter.ViewHolder> {
 
@@ -25,6 +26,10 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
     private final int PRIMARY_TEXT_COLOR;
 
     private final int DISABLED_TEXT_COLOR;
+
+    private static final float THUMBNAIL_ENABLED_ALPHA = 1.0f;
+
+    private static final float THUMBNAIL_DISABLED_ALPHA = 0.5f;
 
     public MusicListAdapter(Context context, OrderedRealmCollection<MusicProviderSource> data,
                             MusicListClickListener callback) {
@@ -55,22 +60,18 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
         viewHolder.data = data;
 
         viewHolder.musicTitle.setText(data.getTitle());
-        viewHolder.duration.setText(String.format("%d:%d", data.getDuration()/60, data.getDuration()%60));
+        viewHolder.duration.setText(UIHelper.genDurationString(data.getDuration()));
+        viewHolder.fileSize.setText(UIHelper.genFileSizeString(data.getDataSizeInMB()));
         Picasso.with(viewHolder.thumbnail.getContext())
                 .load(data.getThumbnailUrl()).into(viewHolder.thumbnail);
 
         boolean is_music_cached = data.getVideoPath() != null;
-        if (is_music_cached) {
-            viewHolder.icon_cache_warning.setVisibility(View.GONE);
-            viewHolder.musicTitle.setTextColor(PRIMARY_TEXT_COLOR);
-            viewHolder.fileSize.setText(String.format("%.1f MB", data.getDataSizeInMB()));
-            viewHolder.thumbnail.setAlpha(1.0f);
-        } else {
-            viewHolder.icon_cache_warning.setVisibility(View.VISIBLE);
-            viewHolder.musicTitle.setTextColor(DISABLED_TEXT_COLOR);
-            viewHolder.fileSize.setText("-- MB");
-            viewHolder.thumbnail.setAlpha(0.5f);
-        }
+        viewHolder.icon_cache_warning
+                .setVisibility(is_music_cached ? View.GONE : View.VISIBLE);
+        viewHolder.musicTitle
+                .setTextColor(is_music_cached ? PRIMARY_TEXT_COLOR : DISABLED_TEXT_COLOR);
+        viewHolder.thumbnail
+                .setAlpha(is_music_cached ? THUMBNAIL_ENABLED_ALPHA : THUMBNAIL_DISABLED_ALPHA);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {

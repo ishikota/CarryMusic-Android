@@ -5,6 +5,7 @@ import android.view.View;
 import android.widget.SeekBar;
 
 import jp.carrymusic.databinding.MediaControllerFullBinding;
+import jp.carrymusic.utils.UIHelper;
 
 public class FullMediaControllerPresenter implements Contract.MusicListPresenterContract {
 
@@ -99,15 +100,7 @@ public class FullMediaControllerPresenter implements Contract.MusicListPresenter
     private String genSeekBarCaption(SeekBar seekBar, int current) {
         current /= 1000;
         int max = seekBar.getMax() / 1000;
-        return String.format("%d:%02d / %d:%02d",
-                fetchMin(current), fetchSec(current), fetchMin(max), fetchSec(max));
-    }
-
-    private int fetchMin(int position) {
-        return position / 60;
-    }
-
-    private int fetchSec(int position) {
-        return position % 60;
+        return String.format("%s / %s",
+                UIHelper.genDurationString(current), UIHelper.genDurationString(max));
     }
 }
