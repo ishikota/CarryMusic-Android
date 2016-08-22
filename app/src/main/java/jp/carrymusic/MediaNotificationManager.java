@@ -243,7 +243,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
         // If skip to previous action is enabled
         if ((mPlaybackState.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0) {
-            notificationBuilder.addAction(android.R.drawable.ic_media_previous,
+            notificationBuilder.addAction(R.drawable.ic_skip_previous_white_48dp,
                     "Previous", mPreviousIntent);
 
             // If there is a "skip to previous" button, the play/pause button will
@@ -257,7 +257,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
         // If skip to next action is enabled
         if ((mPlaybackState.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0) {
-            notificationBuilder.addAction(android.R.drawable.ic_media_next,
+            notificationBuilder.addAction(R.drawable.ic_skip_next_white_48dp,
                 "Next", mNextIntent);
         }
 
@@ -289,11 +289,11 @@ public class MediaNotificationManager extends BroadcastReceiver {
         PendingIntent intent;
         if (mPlaybackState.getState() == PlaybackStateCompat.STATE_PLAYING) {
             label = "Pause";
-            icon = android.R.drawable.ic_media_pause;
+            icon = R.drawable.ic_pause_white_48dp;
             intent = mPauseIntent;
         } else {
             label = "Play";
-            icon = android.R.drawable.ic_media_play;
+            icon = R.drawable.ic_play_arrow_white_48dp;
             intent = mPlayIntent;
         }
         builder.addAction(new NotificationCompat.Action(icon, label, intent));
