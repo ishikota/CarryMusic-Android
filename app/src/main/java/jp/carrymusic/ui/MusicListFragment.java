@@ -263,7 +263,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                                     }
                                 }).show();
                     }
-        });
+                });
     }
 
     private void updateDownloadingState(final MusicProviderSource model, final boolean stateToUpdate) {
@@ -290,6 +290,12 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
             }
         });
         popup.inflate(R.menu.music_list_action_more);
+
+        // hide useless choice
+        if (model.getVideoPath() == null) {
+            popup.getMenu().removeItem(R.id.action_delete_cache);
+        }
+
         popup.show();
     }
 
