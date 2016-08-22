@@ -269,7 +269,7 @@ public class MediaNotificationManager extends BroadcastReceiver {
                                 new int[]{playPauseButtonPosition})  // show only play/pause in compact view
                         .setMediaSession(mSessionToken))
                 //.setColor(mNotificationColor)
-                .setSmallIcon(R.mipmap.ic_launcher)
+                .setSmallIcon(R.drawable.ic_audiotrack_white_48dp)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setUsesChronometer(true)
                 .setContentIntent(createContentIntent(description))
