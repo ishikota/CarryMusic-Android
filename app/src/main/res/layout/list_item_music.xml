@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="@dimen/music_list_row_height">
+    android:layout_height="@dimen/music_list_row_height"
+    android:background="?android:attr/selectableItemBackground">
 
     <ImageView android:id="@+id/thumbnail"
         android:layout_width="@dimen/thumbnail_size"
