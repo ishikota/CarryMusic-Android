@@ -37,9 +37,11 @@ public class CompactMediaControllerPresenter implements Contract.MusicListPresen
         if (BottomSheetBehavior.STATE_EXPANDED == state) {
             mRoot.btnMediaControl.setEnabled(false);
             mRoot.btnMediaControl.setVisibility(View.GONE);
+            mRoot.musicTitle.requestFocus();
         } else if (BottomSheetBehavior.STATE_COLLAPSED == state) {
             mRoot.btnMediaControl.setEnabled(true);
             mRoot.btnMediaControl.setVisibility(View.VISIBLE);
+            mRoot.musicTitle.clearFocus();
         }
     }
 
