@@ -9,6 +9,11 @@
     <string name="delete_data">Delete this item</string>
     <string name="delete_cache">Delete audio cache from device</string>
     <string name="search_query_hint">Enter video id to download…</string>
+
+    <!-- SnackBar -->
+    <string name="retry">Retry</string>
+    <string name="msg_start_download_cache">Downloading audio file…</string>
+    <string name="msg_failed_to_download_cache">Failed to download music</string>
     <string name="undo">Undo</string>
     <string name="msg_delete_data">Deleted</string>
     <string name="msg_delete_cache">Audio cache is deleted from your device</string>

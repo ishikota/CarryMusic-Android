@@ -241,6 +241,8 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
     }
 
     private void downloadVideoToDevice(final MusicProviderSource model) {
+        Snackbar.make(binding.containerForSnackBar,
+                R.string.msg_start_download_cache, Snackbar.LENGTH_SHORT).show();
         updateDownloadingState(model, true);
         DownloadHelper.downloadItemIntoDevice(getContext(), model.getVideoId(),
                 new DownloadHelper.DownloadCallback() {
@@ -252,6 +254,14 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                     @Override
                     public void onError(String message) {
                         updateDownloadingState(model, false);
+                        Snackbar.make(binding.containerForSnackBar,
+                                R.string.msg_failed_to_download_cache, Snackbar.LENGTH_LONG)
+                                .setAction(R.string.retry, new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        downloadVideoToDevice(model);
+                                    }
+                                }).show();
                     }
         });
     }
