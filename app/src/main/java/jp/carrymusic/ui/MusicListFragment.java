@@ -24,6 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import java.io.File;
+
 import io.realm.Realm;
 import jp.carrymusic.MusicService;
 import jp.carrymusic.R;
@@ -32,6 +34,7 @@ import jp.carrymusic.model.MusicProvider;
 import jp.carrymusic.model.MusicProviderSource;
 import jp.carrymusic.utils.DownloadHelper;
 import jp.carrymusic.utils.MusicListDivider;
+import jp.carrymusic.utils.UndoSnackbar;
 
 public class MusicListFragment extends Fragment implements MusicListAdapter.MusicListClickListener,
         Contract.CompactControllerViewContract, Contract.FullControllerViewContract {
@@ -258,68 +261,91 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
             @Override
             public boolean onMenuItemClick(MenuItem item) {
                 if (item.getItemId() == R.id.action_delete_data) {
-                    Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            Log.d(TAG, "put music[" + model.getTitle() + "] in music trash.");
-                            model.setTrashed(true);
-                        }
-                    });
-                    Snackbar.make(binding.containerForSnackBar, "Deleted", Snackbar.LENGTH_LONG)
-                            .setAction("UNDO", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-                                        @Override
-                                        public void execute(Realm realm) {
-                                            Log.d(TAG, "fetch music[" + model.getTitle() + "] from music trash.");
-                                            model.setTrashed(false);
-                                        }
-                                    });
-                                }
-                            })
-                            .setCallback(new Snackbar.Callback() {
-                                @Override
-                                public void onDismissed(Snackbar snackbar, int event) {
-                                    super.onDismissed(snackbar, event);
-                                    if (Snackbar.Callback.DISMISS_EVENT_ACTION != event) {
-                                        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-                                            @Override
-                                            public void execute(Realm realm) {
-                                                Log.d(TAG, "Deleted music[" + model.getTitle() + "] from db and trash.");
-                                                model.deleteFromRealm();
-                                            }
-                                        });
-                                    }
-                                }
-                            }).show();
+                    deleteMusicSourceWithUndoAction(model);
                 } else if (item.getItemId() == R.id.action_delete_cache) {
-                    final String videoPathMemo = model.getVideoPath();
-                    Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-                        @Override
-                        public void execute(Realm realm) {
-                            model.setVideoPath(null);
-                            Snackbar.make(binding.containerForSnackBar, "Deleted", Snackbar.LENGTH_LONG)
-                                    .setAction("UNDO", new View.OnClickListener() {
-                                        @Override
-                                        public void onClick(View v) {
-                                            Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
-                                                @Override
-                                                public void execute(Realm realm) {
-                                                    model.setVideoPath(videoPathMemo);
-                                                }
-                                            });
-                                        }
-                                    })
-                                    .show();
-                        }
-                    });
+                    deleteAudioCacheWithUndoAction(model);
                 }
                 return false;
             }
         });
         popup.inflate(R.menu.music_list_action_more);
         popup.show();
+    }
+
+    private void deleteMusicSourceWithUndoAction(final MusicProviderSource model) {
+        updateTrashStatus(model, true);
+        UndoSnackbar.makeLong(binding.containerForSnackBar, R.string.delete_data, new UndoSnackbar.Callback() {
+            @Override
+            public void onUndo() {
+                updateTrashStatus(model, false);
+            }
+
+            @Override
+            public void onDismissWithoutRedo(Snackbar snackbar) {
+                deleteAudioFromDevice(model.getVideoPath());
+                deleteMusicSource(model);
+            }
+        }).show();
+    }
+
+    private void deleteAudioCacheWithUndoAction(final MusicProviderSource model) {
+        final String videoPathMemo = model.getVideoPath();
+        updateVideoPath(model, null);
+        UndoSnackbar.makeLong(binding.containerForSnackBar, R.string.delete_data, new UndoSnackbar.Callback() {
+            @Override
+            public void onUndo() {
+                updateVideoPath(model, videoPathMemo);
+            }
+
+            @Override
+            public void onDismissWithoutRedo(Snackbar snackbar) {
+                deleteAudioFromDevice(videoPathMemo);
+            }
+        }).show();
+    }
+
+    private void updateTrashStatus(final MusicProviderSource music,final boolean trashed) {
+        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                music.setTrashed(trashed);
+            }
+        });
+    }
+
+    private void deleteMusicSource(final MusicProviderSource music) {
+        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                music.deleteFromRealm();
+            }
+        });
+    }
+
+    private void updateVideoPath(final MusicProviderSource music, final String pathToUpdate) {
+        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                music.setVideoPath(pathToUpdate);
+            }
+        });
+    }
+
+    private void deleteAudioFromDevice(final String filePath){
+        String tag = "deleteAudioFromDevice:";
+        if (filePath != null) {
+            File target = new File(filePath);
+            if (target.delete()) {
+                Log.d(TAG, String.format(
+                        "%s Successfully deleted audio file [%s]", tag, filePath));
+            } else {
+                Log.w(TAG, String.format(
+                        "%s Failed to delete audio file [%s].", tag, filePath));
+            }
+        } else {
+            Log.d(TAG,
+                    String.format("%s audio file [%s] was already deleted", tag,filePath));
+        }
     }
 
     /*
