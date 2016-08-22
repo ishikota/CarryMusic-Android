@@ -91,13 +91,24 @@
 
     </LinearLayout>
 
-    <ImageView android:id="@+id/action_more"
+    <FrameLayout
         android:layout_width="@dimen/action_more_size"
         android:layout_height="@dimen/action_more_size"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_more_vert_black_48dp"
         android:padding="@dimen/action_more_padding"
-        android:alpha="0.3"
-        android:contentDescription="@string/action_more"/>
+        android:layout_gravity="center_vertical">
+
+        <ImageView android:id="@+id/action_more"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/ic_more_vert_black_48dp"
+            android:alpha="0.3"
+            android:contentDescription="@string/action_more"/>
+
+        <ProgressBar android:id="@+id/progress"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 
 </LinearLayout>

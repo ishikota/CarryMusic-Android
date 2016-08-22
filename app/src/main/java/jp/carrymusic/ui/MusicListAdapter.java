@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
@@ -72,12 +73,17 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
                 .setTextColor(is_music_cached ? PRIMARY_TEXT_COLOR : DISABLED_TEXT_COLOR);
         viewHolder.thumbnail
                 .setAlpha(is_music_cached ? THUMBNAIL_ENABLED_ALPHA : THUMBNAIL_DISABLED_ALPHA);
+
+        boolean is_downloading = data.isDownloading();
+        viewHolder.icon_action_more.setVisibility(is_downloading ? View.GONE : View.VISIBLE);
+        viewHolder.progress.setVisibility(is_downloading ? View.VISIBLE : View.GONE);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         public TextView musicTitle, fileSize, duration;
         public ImageView thumbnail, icon_cache_warning, icon_action_more;
         public MusicProviderSource data;
+        public ProgressBar progress;
         public ViewHolder(View itemView) {
             super(itemView);
             musicTitle = (TextView) itemView.findViewById(R.id.music_title);
@@ -86,6 +92,7 @@ public class MusicListAdapter extends RealmRecyclerViewAdapter<MusicProviderSour
             icon_cache_warning = (ImageView) itemView.findViewById(R.id.icon_cache_warning);
             icon_action_more = (ImageView) itemView.findViewById(R.id.action_more);
             thumbnail = (ImageView) itemView.findViewById(R.id.thumbnail);
+            progress = (ProgressBar) itemView.findViewById(R.id.progress);
             itemView.setOnClickListener(this);
             icon_action_more.setOnClickListener(this);
         }

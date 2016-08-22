@@ -224,7 +224,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
     @Override
     public void onMusicSelected(MusicProviderSource model) {
         if (model.getVideoPath() == null) {
-            downloadVideoToDevice(model.getVideoId());
+            downloadVideoToDevice(model);
         } else {
             MediaControllerCompat controller = getActivity().getSupportMediaController();
             int state = controller.getPlaybackState().getState();
@@ -240,16 +240,27 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         }
     }
 
-    private void downloadVideoToDevice(final String videoId) {
-        DownloadHelper.downloadItemIntoDevice(getContext(), videoId, new DownloadHelper.DownloadCallback() {
-            @Override
-            public void onSuccess() {
-                // TODO should notify success in some way
-            }
+    private void downloadVideoToDevice(final MusicProviderSource model) {
+        updateDownloadingState(model, true);
+        DownloadHelper.downloadItemIntoDevice(getContext(), model.getVideoId(),
+                new DownloadHelper.DownloadCallback() {
+                    @Override
+                    public void onSuccess() {
+                        updateDownloadingState(model, false);
+                    }
 
+                    @Override
+                    public void onError(String message) {
+                        updateDownloadingState(model, false);
+                    }
+        });
+    }
+
+    private void updateDownloadingState(final MusicProviderSource model, final boolean stateToUpdate) {
+        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
             @Override
-            public void onError(String message) {
-                // TODO should notify error in some way
+            public void execute(Realm realm) {
+                model.setDownloading(stateToUpdate);
             }
         });
     }

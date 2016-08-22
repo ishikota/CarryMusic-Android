@@ -31,6 +31,9 @@ public class MusicProviderSource extends RealmObject {
     // flag for "REDO" action
     private boolean trashed;
 
+    // flag to update UI during download
+    private boolean downloading;
+
     public float getDataSizeInMB() {
         if (this.getVideoPath() == null) {
             return -1;
@@ -107,5 +110,13 @@ public class MusicProviderSource extends RealmObject {
 
     public void setTrashed(boolean trashed) {
         this.trashed = trashed;
+    }
+
+    public boolean isDownloading() {
+        return downloading;
+    }
+
+    public void setDownloading(boolean downloading) {
+        this.downloading = downloading;
     }
 }
