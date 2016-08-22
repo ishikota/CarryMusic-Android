@@ -82,6 +82,7 @@ public class DownloadHelper {
                                                 MusicProviderSource model =
                                                         realm.where(MusicProviderSource.class)
                                                                 .equalTo("videoId", videoId).findFirst();
+                                                model.setPosition(getNextNewMusicPosition());
                                                 model.setVideoPath(destFile.getAbsolutePath());
                                             }
                                         });
@@ -103,6 +104,12 @@ public class DownloadHelper {
                         callback.onError(e.getMessage());  // network error
                     }
                 });
+    }
+
+    private static int getNextNewMusicPosition() {
+        return Realm.getDefaultInstance().where(MusicProviderSource.class)
+                .equalTo("trashed", false)
+                .min("position").intValue() - 1;
     }
 
 

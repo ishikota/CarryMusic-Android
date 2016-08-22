@@ -34,6 +34,8 @@ public class MusicProviderSource extends RealmObject {
     // flag to update UI during download
     private boolean downloading;
 
+    private int position;
+
     public float getDataSizeInMB() {
         if (this.getVideoPath() == null) {
             return -1;
@@ -118,5 +120,13 @@ public class MusicProviderSource extends RealmObject {
 
     public void setDownloading(boolean downloading) {
         this.downloading = downloading;
+    }
+
+    public int getPosition() {
+        return position;
+    }
+
+    public void setPosition(int position) {
+        this.position = position;
     }
 }

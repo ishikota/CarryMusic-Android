@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import java.io.File;
+import java.util.List;
 
 import io.realm.Realm;
 import jp.carrymusic.MusicService;
@@ -37,7 +38,7 @@ import jp.carrymusic.utils.MusicListDivider;
 import jp.carrymusic.utils.UndoSnackbar;
 
 public class MusicListFragment extends Fragment implements MusicListAdapter.MusicListClickListener,
-        Contract.CompactControllerViewContract, Contract.FullControllerViewContract {
+        Contract.CompactControllerViewContract, Contract.FullControllerViewContract, SortMenuPresenter.SortCallback{
 
 
     private static final String TAG = MusicListFragment.class.getSimpleName();
@@ -45,6 +46,8 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
     private MusicProvider mMusicProvider;
 
     private SearchMenuPresenter mSearchMenuPresenter;
+
+    private SortMenuPresenter mSortMenuPresenter;
 
     private CompactMediaControllerPresenter mCompactControllerPresenter;
 
@@ -58,6 +61,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         setHasOptionsMenu(true);
         mMusicProvider = new MusicProvider();
         mSearchMenuPresenter = new SearchMenuPresenter();
+        mSortMenuPresenter = new SortMenuPresenter();
         mCompactControllerPresenter = new CompactMediaControllerPresenter(this);
         mFullControllerPresenter = new FullMediaControllerPresenter(this);
     }
@@ -102,6 +106,24 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         Log.d(TAG, "onCreateOptionsMenu");
         inflater.inflate(R.menu.main_activity_actions, menu);
         mSearchMenuPresenter.setup(menu);
+        mSortMenuPresenter.setup(this, menu, mMusicProvider);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        Log.d(TAG, "onOptionsItemSelected: item = " + item);
+        switch (item.getItemId()) {
+            case R.id.action_sort:
+                mSortMenuPresenter.onSortStarted(item, binding.recyclerView);
+                break;
+            case R.id.action_sort_done:
+                mSortMenuPresenter.onSortFinished(item, binding.recyclerView);
+                break;
+            case R.id.action_sort_cancel:
+                mSortMenuPresenter.onSortCanceled(item, binding.recyclerView);
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void setupToolbar(Toolbar toolbar) {
@@ -373,6 +395,38 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
             Log.d(TAG,
                     String.format("%s audio file [%s] was already deleted", tag,filePath));
         }
+    }
+
+    /*
+        Callback from SortMenuPresenter
+     */
+
+    @Override
+    public void onSortStarted() {
+        onPauseRequested();
+        binding.bottomSheet.setVisibility(View.GONE);
+        binding.toolbar.setTitle(R.string.title_sort_item);
+    }
+
+    @Override
+    public void onSortCanceled() {
+        binding.bottomSheet.setVisibility(View.VISIBLE);
+        binding.toolbar.setTitle(R.string.app_name);
+    }
+
+    @Override
+    public void onSortFinished(final List<MusicProviderSource> items) {
+        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                for (int i=0; i<items.size(); i++) {
+                    MusicProviderSource sortedItem = items.get(i);
+                    sortedItem.setPosition(i);
+                }
+            }
+        });
+        binding.bottomSheet.setVisibility(View.VISIBLE);
+        binding.toolbar.setTitle(R.string.app_name);
     }
 
     /*

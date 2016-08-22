@@ -14,7 +14,7 @@ public class MusicProvider {
         return Realm.getDefaultInstance()
                 .where(MusicProviderSource.class)
                 .equalTo("trashed", false)
-                .findAll();
+                .findAllSorted("position");
     }
 
 }
