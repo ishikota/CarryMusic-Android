@@ -261,9 +261,38 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
                     Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
                         @Override
                         public void execute(Realm realm) {
-                            model.deleteFromRealm();
+                            Log.d(TAG, "put music[" + model.getTitle() + "] in music trash.");
+                            model.setTrashed(true);
                         }
                     });
+                    Snackbar.make(binding.containerForSnackBar, "Deleted", Snackbar.LENGTH_LONG)
+                            .setAction("UNDO", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+                                        @Override
+                                        public void execute(Realm realm) {
+                                            Log.d(TAG, "fetch music[" + model.getTitle() + "] from music trash.");
+                                            model.setTrashed(false);
+                                        }
+                                    });
+                                }
+                            })
+                            .setCallback(new Snackbar.Callback() {
+                                @Override
+                                public void onDismissed(Snackbar snackbar, int event) {
+                                    super.onDismissed(snackbar, event);
+                                    if (Snackbar.Callback.DISMISS_EVENT_ACTION != event) {
+                                        Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
+                                            @Override
+                                            public void execute(Realm realm) {
+                                                Log.d(TAG, "Deleted music[" + model.getTitle() + "] from db and trash.");
+                                                model.deleteFromRealm();
+                                            }
+                                        });
+                                    }
+                                }
+                            }).show();
                 } else if (item.getItemId() == R.id.action_delete_cache) {
                     final String videoPathMemo = model.getVideoPath();
                     Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {

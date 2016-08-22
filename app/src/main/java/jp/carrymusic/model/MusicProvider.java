@@ -11,7 +11,10 @@ import io.realm.RealmResults;
 public class MusicProvider {
 
     public RealmResults<MusicProviderSource> getAllMusic() {
-        return Realm.getDefaultInstance().where(MusicProviderSource.class).findAll();
+        return Realm.getDefaultInstance()
+                .where(MusicProviderSource.class)
+                .equalTo("trashed", false)
+                .findAll();
     }
 
 }

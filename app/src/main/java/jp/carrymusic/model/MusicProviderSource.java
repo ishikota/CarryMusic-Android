@@ -28,6 +28,9 @@ public class MusicProviderSource extends RealmObject {
 
     private String videoPath;
 
+    // flag for "REDO" action
+    private boolean trashed;
+
     public float getDataSizeInMB() {
         if (this.getVideoPath() == null) {
             return -1;
@@ -96,5 +99,13 @@ public class MusicProviderSource extends RealmObject {
 
     public void setVideoPath(String videoPath) {
         this.videoPath = videoPath;
+    }
+
+    public boolean isTrashed() {
+        return trashed;
+    }
+
+    public void setTrashed(boolean trashed) {
+        this.trashed = trashed;
     }
 }
