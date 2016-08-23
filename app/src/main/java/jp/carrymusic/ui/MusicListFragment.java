@@ -128,6 +128,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
 
     private void setupToolbar(Toolbar toolbar) {
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
+        toolbar.setNavigationIcon(R.mipmap.ic_launcher);
     }
 
     private void setupRecyclerView(RecyclerView recyclerView, Context context) {
