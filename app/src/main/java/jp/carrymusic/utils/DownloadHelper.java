@@ -48,6 +48,7 @@ public class DownloadHelper {
                         Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
                             @Override
                             public void execute(Realm realm) {
+                                model.setPosition(getNextNewMusicPosition());
                                 realm.copyToRealm(model);
                             }
                         });
@@ -60,6 +61,15 @@ public class DownloadHelper {
                         callback.onError(e.getMessage());
                     }
                 });
+    }
+
+    /*
+        find minimum music position for new items.
+     */
+    private static int getNextNewMusicPosition() {
+        return Realm.getDefaultInstance().where(MusicProviderSource.class)
+                .equalTo("trashed", false)
+                .min("position").intValue() - 1;
     }
 
     /*
@@ -82,7 +92,6 @@ public class DownloadHelper {
                                                 MusicProviderSource model =
                                                         realm.where(MusicProviderSource.class)
                                                                 .equalTo("videoId", videoId).findFirst();
-                                                model.setPosition(getNextNewMusicPosition());
                                                 model.setVideoPath(destFile.getAbsolutePath());
                                             }
                                         });
@@ -104,12 +113,6 @@ public class DownloadHelper {
                         callback.onError(e.getMessage());  // network error
                     }
                 });
-    }
-
-    private static int getNextNewMusicPosition() {
-        return Realm.getDefaultInstance().where(MusicProviderSource.class)
-                .equalTo("trashed", false)
-                .min("position").intValue() - 1;
     }
 
 
