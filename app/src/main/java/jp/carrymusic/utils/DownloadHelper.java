@@ -2,6 +2,7 @@ package jp.carrymusic.utils;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.VisibleForTesting;
 import android.util.Log;
 import android.util.Pair;
 
@@ -132,7 +133,13 @@ public class DownloadHelper {
 
 
     private static File getMusicDestinationFile(Context context, String fileName) {
-        return new File(context.getFilesDir(), String.format("%s.mp3", fileName));
+        String destPath = sanitizeFileName(String.format("%s.mp3", fileName));
+        return new File(context.getFilesDir(), destPath);
+    }
+
+    @VisibleForTesting
+    public static String sanitizeFileName(String original) {
+        return original.replaceAll("/", "-").replaceAll("\\s+", "");
     }
 
     /*
