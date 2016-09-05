@@ -239,18 +239,11 @@ public class MediaNotificationManager extends BroadcastReceiver {
         }
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(mService);
-        int playPauseButtonPosition = 0;
 
         // If skip to previous action is enabled
         if ((mPlaybackState.getActions() & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0) {
             notificationBuilder.addAction(R.drawable.ic_skip_previous_white_48dp,
                     "Previous", mPreviousIntent);
-
-            // If there is a "skip to previous" button, the play/pause button will
-            // be the second one. We need to keep track of it, because the MediaStyle notification
-            // requires to specify the index of the buttons (actions) that should be visible
-            // when in compact view.
-            playPauseButtonPosition = 1;
         }
 
         addPlayPauseAction(notificationBuilder);
@@ -265,8 +258,8 @@ public class MediaNotificationManager extends BroadcastReceiver {
 
         notificationBuilder
                 .setStyle(new NotificationCompat.MediaStyle()
-                        .setShowActionsInCompactView(
-                                new int[]{playPauseButtonPosition})  // show only play/pause in compact view
+                        // show all actions in compact view
+                        .setShowActionsInCompactView(range(notificationBuilder.mActions.size()))
                         .setMediaSession(mSessionToken))
                 //.setColor(mNotificationColor)
                 .setSmallIcon(R.drawable.ic_audiotrack_white_48dp)
@@ -280,6 +273,15 @@ public class MediaNotificationManager extends BroadcastReceiver {
         fetchBitmapFromURLAsync(mMetadata.getString(MediaMetadataCompat.METADATA_KEY_ALBUM_ART_URI), notificationBuilder);
 
         return notificationBuilder.build();
+    }
+
+    // Why java do not have range function !!!
+    private int[] range(int actionCount) {
+        int[] actionIndex = new int[actionCount];
+        for (int i=0; i<actionCount; i++) {
+            actionIndex[i] = i;
+        }
+        return actionIndex;
     }
 
     private void addPlayPauseAction(NotificationCompat.Builder builder) {
