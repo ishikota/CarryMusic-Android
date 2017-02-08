@@ -13,6 +13,9 @@
     <string name="search_query_hint">Enter video id to download…</string>
     <string name="title_sort_item">Sorting play list</string>
     <string name="title_sort_cancel">Cancel</string>
+    <string name="endpoint_setting">Endpoint</string>
+    <string name="endpoint_query_hint">Enter endpoint of server</string>
+    <string name="endpoint_update_msg">Endpoint is updated</string>
 
     <!-- SnackBar -->
     <string name="retry">Retry</string>

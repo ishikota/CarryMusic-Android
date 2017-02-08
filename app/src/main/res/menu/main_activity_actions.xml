@@ -24,4 +24,9 @@
         android:title="@string/progress"
         android:visible="false"
         app:showAsAction="always"/>
+    <item android:id="@+id/action_endpoint"
+        android:title="@string/endpoint_setting"
+        android:icon="@drawable/ic_rss_feed_black_48dp"
+        app:showAsAction="ifRoom|collapseActionView"
+        app:actionViewClass="android.support.v7.widget.SearchView" />
 </menu>

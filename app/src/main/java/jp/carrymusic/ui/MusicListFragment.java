@@ -1,6 +1,7 @@
 package jp.carrymusic.ui;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -38,7 +39,8 @@ import jp.carrymusic.utils.MusicListDivider;
 import jp.carrymusic.utils.UndoSnackbar;
 
 public class MusicListFragment extends Fragment implements MusicListAdapter.MusicListClickListener,
-        Contract.CompactControllerViewContract, Contract.FullControllerViewContract, SortMenuPresenter.SortCallback{
+        Contract.CompactControllerViewContract, Contract.FullControllerViewContract,
+        SortMenuPresenter.SortCallback , EndpointMenuPresenter.EndpointUpdatedListener {
 
 
     private static final String TAG = MusicListFragment.class.getSimpleName();
@@ -48,6 +50,8 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
     private SearchMenuPresenter mSearchMenuPresenter;
 
     private SortMenuPresenter mSortMenuPresenter;
+
+    private EndpointMenuPresenter mEndpointMenuPresenter;
 
     private CompactMediaControllerPresenter mCompactControllerPresenter;
 
@@ -62,6 +66,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         mMusicProvider = new MusicProvider();
         mSearchMenuPresenter = new SearchMenuPresenter();
         mSortMenuPresenter = new SortMenuPresenter();
+        mEndpointMenuPresenter = new EndpointMenuPresenter();
         mCompactControllerPresenter = new CompactMediaControllerPresenter(this);
         mFullControllerPresenter = new FullMediaControllerPresenter(this);
     }
@@ -106,6 +111,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         Log.d(TAG, "onCreateOptionsMenu");
         inflater.inflate(R.menu.main_activity_actions, menu);
         mSearchMenuPresenter.setup(menu);
+        mEndpointMenuPresenter.setup(this, menu);
         mSortMenuPresenter.setup(this, menu, mMusicProvider);
     }
 
@@ -420,7 +426,7 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         Realm.getDefaultInstance().executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
-                for (int i=0; i<items.size(); i++) {
+                for (int i = 0; i < items.size(); i++) {
                     MusicProviderSource sortedItem = items.get(i);
                     sortedItem.setPosition(i);
                 }
@@ -428,6 +434,22 @@ public class MusicListFragment extends Fragment implements MusicListAdapter.Musi
         });
         binding.bottomSheet.setVisibility(View.VISIBLE);
         binding.toolbar.setTitle(R.string.app_name);
+    }
+
+    /*
+        Callback from EndpointMenuPresenter
+     */
+
+    @Override
+    public SharedPreferences getPreference() {
+        return getActivity().getSharedPreferences(
+                EndpointMenuPresenter.PREF_NAME, Context.MODE_PRIVATE);
+    }
+
+    @Override
+    public void updated() {
+        Snackbar.make(binding.containerForSnackBar,
+                R.string.endpoint_update_msg, Snackbar.LENGTH_SHORT).show();
     }
 
     /*

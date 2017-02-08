@@ -17,21 +17,22 @@ import rx.schedulers.Schedulers;
  */
 public class CarryMusicApiClient {
 
-    private static final String ENDPOINT = "http://52.197.203.125";
-
+    private static String endpoint = null;
     private static CarryMusicApiClient instance;
     private final CarryMusicService service;
 
+    public static void setEndpoint(String e) {
+        endpoint = e;
+        instance = new CarryMusicApiClient(endpoint);
+    }
+
     public static CarryMusicApiClient getInstance() {
-        if (instance == null) {
-            instance = new CarryMusicApiClient();
-        }
         return instance;
     }
 
-    private CarryMusicApiClient() {
+    private CarryMusicApiClient(String endpoint) {
         service = new RestAdapter.Builder()
-                .setEndpoint(ENDPOINT)
+                .setEndpoint(String.format("http://%s:3000", endpoint))
                 .setConverter(new GsonConverter(new Gson()))
                 .build()
                 .create(CarryMusicService.class);

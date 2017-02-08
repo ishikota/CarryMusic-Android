@@ -60,6 +60,7 @@ public class SortMenuPresenter {
 
     private void setupSortingMenu(Menu menu) {
         menu.findItem(R.id.action_search).setVisible(false);
+        menu.findItem(R.id.action_endpoint).setVisible(false);
         menu.findItem(R.id.action_sort).setVisible(false);
         menu.findItem(R.id.action_sort_done).setVisible(true);
         menu.findItem(R.id.action_sort_cancel).setVisible(true);
@@ -85,6 +86,7 @@ public class SortMenuPresenter {
 
     private void restoreOriginalMenu(Menu menu) {
         menu.findItem(R.id.action_search).setVisible(true);
+        menu.findItem(R.id.action_endpoint).setVisible(true);
         menu.findItem(R.id.action_sort).setVisible(true);
         menu.findItem(R.id.action_sort_done).setVisible(false);
         menu.findItem(R.id.action_sort_cancel).setVisible(false);
